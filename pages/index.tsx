@@ -1,8 +1,10 @@
 import type { NextPage } from 'next'
 import Layout from 'components/layout'
 import { useEffect } from 'react'
-import { extractSheets } from "spreadsheet-to-json"
-
+import { useAppSelector } from 'components/Redux/hooks'
+import { getProductDetails, getProducts } from 'components/Data/functions'
+import { useDispatch } from 'react-redux'
+import Link from 'next/link'
 
 const collections = [
   {
@@ -28,18 +30,18 @@ const collections = [
       'Person sitting at a wooden desk with paper note organizer, pencil and tablet.',
   },
 ]
-const trendingProducts = [
-  {
-    id: 1,
-    name: 'Leather Long Wallet',
-    color: 'Natural',
-    price: '$75',
-    href: '#',
-    imageSrc:
-      'https://tailwindui.com/img/ecommerce-images/home-page-04-trending-product-02.jpg',
-    imageAlt: 'Hand stitched, orange leather long wallet.',
-  }
-]
+// const trendingProducts = [
+//   {
+//     id: 1,
+//     name: 'Leather Long Wallet',
+//     color: 'Natural',
+//     price: '$75',
+//     href: '#',
+//     imageSrc:
+//       'https://tailwindui.com/img/ecommerce-images/home-page-04-trending-product-02.jpg',
+//     imageAlt: 'Hand stitched, orange leather long wallet.',
+//   }
+// ]
 const perks = [
   {
     name: 'Free returns',
@@ -72,11 +74,16 @@ const perks = [
 ]
 
 
-
-
 const Home: NextPage = () => {
+  const dispatch = useDispatch()
+  useEffect(() => {
+    getProducts(dispatch);
+    getProductDetails('2', dispatch)
+  }, [])
 
-
+  const trendingProducts = useAppSelector(state => state.item)
+  const thisProduct = useAppSelector(state => state.currentItem)
+  console.log(thisProduct)
 
   return (
     <div className="">
@@ -202,13 +209,17 @@ const Home: NextPage = () => {
               <div className="mt-6 grid grid-cols-2 gap-x-4 gap-y-10 sm:gap-x-6 md:grid-cols-4 md:gap-y-0 lg:gap-x-8">
                 {trendingProducts.map((product) => (
                   <div key={product.id} className="group relative">
+                    {/* <Link href={`http://localhost:3000/api/items/${product.id}`}> */}
                     <div className="h-56 w-full overflow-hidden rounded-md group-hover:opacity-75 lg:h-72 xl:h-80">
+                      
                       <img
                         src={product.imageSrc}
                         alt={product.imageAlt}
                         className="h-full w-full object-cover object-center"
                       />
                     </div>
+                    {/* </Link> */}
+
                     <h3 className="mt-4 text-sm text-gray-700">
                       <a href={product.href}>
                         <span className="absolute inset-0" />

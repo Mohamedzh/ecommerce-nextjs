@@ -3,26 +3,27 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 import { extractSheets } from "spreadsheet-to-json"
 
 
-export default function handler(
+export default async function handler (
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  extractSheets(
+  const credentials2 = JSON.parse(
+    Buffer.from(process.env.secret!, 'base64').toString()
+  )
+  await extractSheets(
     {
       // your google spreadhsheet key
       spreadsheetKey: "1l2YilJsbBPG4d1hPX6PrVTXsqpUX06AEWIkh1Q6ecec",
       // your google oauth2 credentials or API_KEY
-      credentials: require(
-        '../.././secret.json'
-      ),
+      
+      credentials: credentials2,
       // optional: names of the sheets you want to extract
-      sheetsToExtract: ["orders"],
+      sheetsToExtract: ["items"],
     },
     function (err: Error, data: any) {
-      console.log("data", data);
-      res.status(200).json({ name: data })
+      // console.log(data.items)
+      res.status(200).send({ data })
     }
   );
-
 
 }

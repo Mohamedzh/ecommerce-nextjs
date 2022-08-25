@@ -1,13 +1,16 @@
 import { configureStore } from "@reduxjs/toolkit";
 // import { createWrapper } from "next-redux-wrapper";
-import { cartSlice } from './Slices/cartSlice'
-import { itemSlice } from './Slices/itemSlice'
+import cartSlice from './Slices/cartSlice'
+import itemSlice from './Slices/itemSlice'
+import currentItemSlice from './Slices/currentItemSlice'
 
 
 export const store = configureStore({
   reducer: {
-    cart: cartSlice.reducer,
-    item: itemSlice.reducer
+    cart: cartSlice,
+    item: itemSlice,
+    currentItem: currentItemSlice
+
   }
 })
 

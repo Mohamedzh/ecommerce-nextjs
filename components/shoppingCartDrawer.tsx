@@ -4,10 +4,11 @@ import { XIcon } from '@heroicons/react/outline'
 import { Fragment } from 'react'
 import { CartItem, Product } from 'types'
 import Dropdown from './dropdown'
+import Link from 'next/link'
 
 const cart: CartItem[] = [
   {
-    id: 1,
+    id: '1',
     name: 'Throwback Hip Bag',
     href: '#',
     color: 'Salmon',
@@ -20,7 +21,7 @@ const cart: CartItem[] = [
       'Salmon orange fabric pouch with match zipper, gray zipper pull, and adjustable hip belt.',
   },
   {
-    id: 2,
+    id: '2',
     name: 'Medium Stuff Satchel',
     href: '#',
     color: 'Blue',
@@ -159,12 +160,13 @@ export default function ShoppingCartDrawer({ open, setOpen }: props) {
                         Shipping and taxes calculated at checkout.
                       </p>
                       <div className="mt-6">
+                        <Link href='/checkout'>
                         <a
-                          href="#"
                           className="flex items-center justify-center rounded-md border border-transparent bg-indigo-600 px-6 py-3 text-base font-medium text-white shadow-sm hover:bg-indigo-700"
                         >
                           Checkout
                         </a>
+                        </Link>
                       </div>
                       <div className="mt-6 flex justify-center text-center text-sm text-gray-500">
                         <p>

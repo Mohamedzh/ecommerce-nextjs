@@ -4,7 +4,7 @@ import { classNames } from 'lib'
 import { Fragment, useState } from 'react'
 import Drawer from './drawer'
 import ShoppingCartDrawer from './shoppingCartDrawer'
-import {navigation} from './navigationItems'
+import {navigation} from './Data/data'
 
 
 function Header() {

@@ -2,7 +2,7 @@ import { Dialog, Tab, Transition } from '@headlessui/react'
 import { XIcon } from '@heroicons/react/outline'
 import { classNames } from 'lib'
 import { Fragment } from 'react'
-import {navigation} from './navigationItems'
+import {navigation} from './Data/data'
 
 type props = {
   open: boolean

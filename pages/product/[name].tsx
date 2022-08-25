@@ -2,60 +2,12 @@ import { StarIcon } from '@heroicons/react/solid'
 import Layout from 'components/layout'
 import { classNames } from 'lib'
 import { useState } from 'react'
-import {reviews} from '../../components/reviews'
+import { reviews, product } from '../../components/Data/data'
 import axios from 'axios'
-
-const product = {
-  name: 'Basic Tee 6-Pack',
-  price: '$192',
-  href: '#',
-  images: [
-    {
-      src: 'https://tailwindui.com/img/ecommerce-images/product-page-02-secondary-product-shot.jpg',
-      alt: 'Two each of gray, white, and black shirts laying flat.',
-    },
-    {
-      src: 'https://tailwindui.com/img/ecommerce-images/product-page-02-tertiary-product-shot-01.jpg',
-      alt: 'Model wearing plain black basic tee.',
-    },
-    {
-      src: 'https://tailwindui.com/img/ecommerce-images/product-page-02-tertiary-product-shot-02.jpg',
-      alt: 'Model wearing plain gray basic tee.',
-    },
-    {
-      src: 'https://tailwindui.com/img/ecommerce-images/product-page-02-featured-product-shot.jpg',
-      alt: 'Model wearing plain white basic tee.',
-    },
-  ],
-  colors: [
-    { name: 'White', class: 'bg-white', selectedClass: 'ring-gray-400' },
-    { name: 'Gray', class: 'bg-gray-200', selectedClass: 'ring-gray-400' },
-    { name: 'Black', class: 'bg-gray-900', selectedClass: 'ring-gray-900' },
-  ],
-  sizes: [
-    { name: 'XXS', inStock: false },
-    { name: 'XS', inStock: true },
-    { name: 'S', inStock: true },
-    { name: 'M', inStock: true },
-    { name: 'L', inStock: true },
-    { name: 'XL', inStock: true },
-    { name: '2XL', inStock: true },
-    { name: '3XL', inStock: true },
-  ],
-  description:
-    'The Basic Tee 6-Pack allows you to fully express your vibrant personality with three grayscale options. Feeling adventurous? Put on a heather gray tee. Want to be a trendsetter? Try our exclusive colorway: "Black". Need to add an extra pop of color to your outfit? Our white tee has you covered.',
-  highlights: [
-    'Hand cut and sewn locally',
-    'Dyed with our proprietary colors',
-    'Pre-washed & pre-shrunk',
-    'Ultra-soft 100% cotton',
-  ],
-  details:
-    'The 6-Pack includes two black, two white, and two heather gray Basic Tees. Sign up for our subscription service and be the first to get new, exciting colors, like our upcoming "Charcoal Gray" limited release.',
-}
+import { Product } from 'types'
 
 
-export default function ProductPage() {
+export default function ProductPage({ res }: { res: any }) {
   const [open, setOpen] = useState(false)
   const [selectedColor, setSelectedColor] = useState(product.colors[0])
   const [selectedSize, setSelectedSize] = useState(product.sizes[2])
@@ -133,7 +85,7 @@ export default function ProductPage() {
             </div>
 
             <form className="mt-10">
-              
+
 
               <button
                 type="submit"
@@ -247,12 +199,11 @@ export default function ProductPage() {
 
 export async function getStaticPaths() {
   // Call an external API endpoint to get posts
-  const res = await axios.get('http://localhost:3000/api/items/all')
-  const items = res.data
-
+  const res = await axios.get('http://localhost:3000/api/items')
+  const items = res.data.data.items
   // Get the paths we want to pre-render based on posts
-  const paths = items.map((item:any) => ({
-    params: { id: item.id },
+  const paths = items.map((item: Product) => ({
+    params: { name: item.id },
   }))
 
   // We'll pre-render only these paths at build time.
@@ -260,15 +211,12 @@ export async function getStaticPaths() {
   return { paths, fallback: false }
 }
 
-// This also gets called at build time
-export async function getStaticProps({ params }: {params:{id:number}}) {
-  // params contains the post `id`.
-  // If the route is like /posts/1, then params.id is 1
-  const res = await fetch(`https://.../posts/${params.id}`)
-  const post = await res.json()
+export async function getStaticProps({ params }: { params: { name: string } }) {
 
+  const res = await axios.get(`http://localhost:3000/api/items/${params.name}`)
+  const data:any = res.data
+  console.log(data)
   // Pass post data to the page via props
-  return { props: { post } }
+  return { props: { data } }
 }
 
-// export default Post

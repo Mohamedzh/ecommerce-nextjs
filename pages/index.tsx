@@ -1,5 +1,8 @@
 import type { NextPage } from 'next'
 import Layout from 'components/layout'
+import { useEffect } from 'react'
+import { extractSheets } from "spreadsheet-to-json"
+
 
 const collections = [
   {
@@ -68,7 +71,13 @@ const perks = [
   },
 ]
 
+
+
+
 const Home: NextPage = () => {
+
+
+
   return (
     <div className="">
       <Layout>

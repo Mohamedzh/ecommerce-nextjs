@@ -221,10 +221,12 @@ const Home: NextPage = () => {
                     {/* </Link> */}
 
                     <h3 className="mt-4 text-sm text-gray-700">
-                      <a href={product.href}>
+                      <Link href={product.href}>
+                      <a>
                         <span className="absolute inset-0" />
                         {product.name}
                       </a>
+                      </Link>
                     </h3>
                     <p className="mt-1 text-sm text-gray-500">
                       {product.color}

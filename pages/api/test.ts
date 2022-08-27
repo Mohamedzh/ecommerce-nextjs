@@ -10,7 +10,6 @@ const getSheets = async (
   req: NextApiRequest,
   res: NextApiResponse
 ) => {
-  const { product } = req.query
   const credentials2 = JSON.parse(
     Buffer.from(process.env.secret!, 'base64').toString()
   )
@@ -21,15 +20,12 @@ const getSheets = async (
       sheetsToExtract: ["items", "highlights", "images"],
     },
     function (err: Error, data: any) {
-      if(req.query.product){
-        console.log(req.query.product)
-        let products = data.items.filter((item:Product)=>item.id===req.query.product)
-        let highlights =data.highlights.filter((item:Product)=>item.id===req.query.product)
-        let images =data.images.filter((item:Product)=>item.id===req.query.product)
-      const currentProduct = data.items.find((item: Product) => item.id === req.query.product)
-      console.log(currentProduct)
-      const arr = data.items
-      res.status(200).send({ currentProduct, highlights, images  })}
+    
+    let products = data.items.filter((item:Product)=>item.id==="1")
+    let highlights =data.highlights.filter((item:Product)=>item.id==="1")
+    let images =data.images.filter((item:Product)=>item.id==="1")
+
+      res.status(200).send({ products, highlights, images })
     }
   );
 }

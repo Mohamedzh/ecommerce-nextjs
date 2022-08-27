@@ -1,15 +1,18 @@
 import { Popover, Transition } from '@headlessui/react'
 import { MenuIcon, ShoppingBagIcon } from '@heroicons/react/outline'
 import { classNames } from 'lib'
-import { Fragment, useState } from 'react'
+import { Fragment, useEffect, useState } from 'react'
 import Drawer from './drawer'
 import ShoppingCartDrawer from './shoppingCartDrawer'
 import {navigation} from './Data/data'
+import Link from 'next/link'
+import { useAppSelector } from './Redux/hooks'
 
 
 function Header() {
   const [open, setOpen] = useState(false)
   const [openShoppingCart, setOpenShoppingCart] = useState(false)
+  const cart = useAppSelector(state=>state.cart)
 
   return (
     <>
@@ -27,14 +30,16 @@ function Header() {
               <div className="flex h-16 items-center justify-between">
                 {/* Logo (lg+) */}
                 <div className="hidden lg:flex lg:flex-1 lg:items-center">
-                  <a href="#">
+                  <Link href="/">
+                    <a>
                     <span className="sr-only">Workflow</span>
                     <img
                       className="h-8 w-auto"
                       src="https://tailwindui.com/img/logos/workflow-mark.svg?color=indigo&shade=600"
                       alt=""
                     />
-                  </a>
+                    </a>
+                  </Link>
                 </div>
 
                 <div className="hidden h-full lg:flex">
@@ -176,7 +181,7 @@ function Header() {
                           aria-hidden="true"
                         />
                         <span className="ml-2 text-sm font-medium text-gray-700 group-hover:text-gray-800">
-                          0
+                          {cart.length}
                         </span>
                         <span className="sr-only">items in cart, view bag</span>
                       </a>

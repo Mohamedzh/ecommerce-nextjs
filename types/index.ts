@@ -7,6 +7,8 @@ export interface Product {
   availableQty: number
   imageSrc: string
   imageAlt: string
+  description: string
+  details: string
 }
 
 export interface CartItem extends Product {
@@ -29,4 +31,15 @@ export type Page = {
 }
 export type Navigation = {
   categories: Category[]
+}
+
+export type Highlights = {
+  id: string
+  highlight:string
+}
+
+export type Image = {
+  id: string
+  src: string
+  alt: string
 }

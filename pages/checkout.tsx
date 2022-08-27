@@ -1,45 +1,21 @@
 import { RadioGroup } from '@headlessui/react'
 import { CheckCircleIcon, TrashIcon } from '@heroicons/react/solid'
+import { subtotal, updateQty } from 'components/Data/functions'
 import Dropdown from 'components/dropdown'
 import Layout from 'components/layout'
+import { useAppSelector } from 'components/Redux/hooks'
 import { classNames } from 'lib'
 import { useState } from 'react'
+import { useDispatch } from 'react-redux'
 
-const products = [
-  {
-    id: 1,
-    title: 'Basic Tee',
-    href: '#',
-    price: '$32.00',
-    color: 'Black',
-    size: 'Large',
-    imageSrc:
-      'https://tailwindui.com/img/ecommerce-images/checkout-page-02-product-01.jpg',
-    imageAlt: "Front of men's Basic Tee in black.",
-    availableQty: 10,
-  },
-  {
-    id: 2,
-    title: 'Emad Tee',
-    href: '#',
-    price: '$32.00',
-    color: 'Black',
-    size: 'Large',
-    imageSrc:
-      'https://tailwindui.com/img/ecommerce-images/checkout-page-02-product-01.jpg',
-    imageAlt: "Front of men's Basic Tee in black.",
-    availableQty: 6,
-  },
-  // More products...
-]
 const deliveryMethods = [
   {
     id: 1,
     title: 'Standard',
     turnaround: '4–10 business days',
-    price: '$5.00',
+    price: '5',
   },
-  { id: 2, title: 'Express', turnaround: '2–5 business days', price: '$16.00' },
+  { id: 2, title: 'Express', turnaround: '2–5 business days', price: '16' },
 ]
 const paymentMethods = [
   { id: 'credit-card', title: 'Credit card' },
@@ -48,6 +24,9 @@ const paymentMethods = [
 ]
 
 export default function Example() {
+  const dispatch = useDispatch()
+  const cart = useAppSelector(state=>state.cart)
+  let tax = 5.52
   const [open, setOpen] = useState(false)
   const [selectedDeliveryMethod, setSelectedDeliveryMethod] = useState(
     deliveryMethods[0]
@@ -472,7 +451,7 @@ export default function Example() {
                 <div className="mt-4 rounded-lg border border-gray-200 bg-white shadow-sm">
                   <h3 className="sr-only">Items in your cart</h3>
                   <ul role="list" className="divide-y divide-gray-200">
-                    {products.map((product) => (
+                    {cart.map((product) => (
                       <li key={product.id} className="flex py-6 px-4 sm:px-6">
                         <div className="flex-shrink-0">
                           <img
@@ -490,15 +469,16 @@ export default function Example() {
                                   href={product.href}
                                   className="font-medium text-gray-700 hover:text-gray-800"
                                 >
-                                  {product.title}
+                                  {product.name}
                                 </a>
                               </h4>
                               <p className="mt-1 text-sm text-gray-500">
                                 {product.color}
                               </p>
-                              <p className="mt-1 text-sm text-gray-500">
-                                {product.size}
-                              </p>
+                              {/* size */}
+                              {/* <p className="mt-1 text-sm text-gray-500">
+                                {product.name}
+                              </p> */}
                             </div>
 
                             <div className="ml-4 flow-root flex-shrink-0">
@@ -517,7 +497,7 @@ export default function Example() {
 
                           <div className="flex flex-1 items-end justify-between pt-2">
                             <p className="mt-1 text-sm font-medium text-gray-900">
-                              {product.price}
+                              ${product.price}.00
                             </p>
 
                             <div className="ml-4">
@@ -526,12 +506,15 @@ export default function Example() {
                               </label>
                               <Dropdown
                                 onChange={(value) => {
+                                  updateQty(product.id, +value, dispatch)
                                   console.log('hello world' + value)
                                 }}
                                 values={Array.from(
-                                  Array(product.availableQty),
+                                  Array(Number(product.availableQty)),
                                   (_, i) => i + 1
                                 )}
+                                Qty = {product.quantity}
+
                               />
                             </div>
                           </div>
@@ -543,25 +526,25 @@ export default function Example() {
                     <div className="flex items-center justify-between">
                       <dt className="text-sm">Subtotal</dt>
                       <dd className="text-sm font-medium text-gray-900">
-                        $64.00
+                        ${subtotal(cart)}.00
                       </dd>
                     </div>
                     <div className="flex items-center justify-between">
                       <dt className="text-sm">Shipping</dt>
                       <dd className="text-sm font-medium text-gray-900">
-                        $5.00
+                        ${Number(selectedDeliveryMethod.price)}.00
                       </dd>
                     </div>
                     <div className="flex items-center justify-between">
                       <dt className="text-sm">Taxes</dt>
                       <dd className="text-sm font-medium text-gray-900">
-                        $5.52
+                        ${tax}
                       </dd>
                     </div>
                     <div className="flex items-center justify-between border-t border-gray-200 pt-6">
                       <dt className="text-base font-medium">Total</dt>
                       <dd className="text-base font-medium text-gray-900">
-                        $75.52
+                        ${subtotal(cart)+tax+Number(selectedDeliveryMethod.price)}
                       </dd>
                     </div>
                   </dl>

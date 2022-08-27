@@ -2,15 +2,24 @@ import { StarIcon } from '@heroicons/react/solid'
 import Layout from 'components/layout'
 import { classNames } from 'lib'
 import { useState } from 'react'
-import { reviews, product } from '../../components/Data/data'
+import { reviews } from '../../components/Data/data'
 import axios from 'axios'
-import { Product } from 'types'
+import { Highlights, Image, Product } from 'types'
+import { addToCart } from 'components/Redux/Slices/cartSlice'
+import { useDispatch } from 'react-redux'
+
+type Props = {
+  product: Product,
+  highlights: Highlights[],
+  images: Image[]
+}
 
 
-export default function ProductPage({ res }: { res: any }) {
+export default function ProductPage({ product, highlights, images }: Props) {
+  const dispatch = useDispatch()
   const [open, setOpen] = useState(false)
-  const [selectedColor, setSelectedColor] = useState(product.colors[0])
-  const [selectedSize, setSelectedSize] = useState(product.sizes[2])
+  // const [selectedColor, setSelectedColor] = useState(product.colors[0])
+  // const [selectedSize, setSelectedSize] = useState(product.sizes[2])
 
   return (
     <Layout>
@@ -19,31 +28,31 @@ export default function ProductPage({ res }: { res: any }) {
         <div className="mx-auto mt-6 max-w-2xl sm:px-6 lg:grid lg:max-w-7xl lg:grid-cols-3 lg:gap-x-8 lg:px-8">
           <div className="aspect-w-3 aspect-h-4 hidden overflow-hidden rounded-lg lg:block">
             <img
-              src={product.images[0].src}
-              alt={product.images[0].alt}
+              src={images[0].src}
+              alt={images[0].alt}
               className="h-full w-full object-cover object-center"
             />
           </div>
           <div className="hidden lg:grid lg:grid-cols-1 lg:gap-y-8">
             <div className="aspect-w-3 aspect-h-2 overflow-hidden rounded-lg">
               <img
-                src={product.images[1].src}
-                alt={product.images[1].alt}
+                src={images[1].src}
+                alt={images[1].alt}
                 className="h-full w-full object-cover object-center"
               />
             </div>
             <div className="aspect-w-3 aspect-h-2 overflow-hidden rounded-lg">
               <img
-                src={product.images[2].src}
-                alt={product.images[2].alt}
+                src={images[2].src}
+                alt={images[2].alt}
                 className="h-full w-full object-cover object-center"
               />
             </div>
           </div>
           <div className="aspect-w-4 aspect-h-5 sm:overflow-hidden sm:rounded-lg lg:aspect-w-3 lg:aspect-h-4">
             <img
-              src={product.images[3].src}
-              alt={product.images[3].alt}
+              src={images[3].src}
+              alt={images[3].alt}
               className="h-full w-full object-cover object-center"
             />
           </div>
@@ -60,7 +69,7 @@ export default function ProductPage({ res }: { res: any }) {
           {/* Options */}
           <div className="mt-4 lg:row-span-3 lg:mt-0">
             <h2 className="sr-only">Product information</h2>
-            <p className="text-3xl text-gray-900">{product.price}</p>
+            <p className="text-3xl text-gray-900">${product.price}</p>
 
             {/* Reviews */}
             <div className="mt-6">
@@ -90,6 +99,7 @@ export default function ProductPage({ res }: { res: any }) {
               <button
                 type="submit"
                 className="mt-10 flex w-full items-center justify-center rounded-md border border-transparent bg-indigo-600 py-3 px-8 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                onClick={(e)=>{dispatch(addToCart(product)); e.preventDefault()}}
               >
                 Add to bag
               </button>
@@ -111,9 +121,9 @@ export default function ProductPage({ res }: { res: any }) {
 
               <div className="mt-4">
                 <ul role="list" className="list-disc space-y-2 pl-4 text-sm">
-                  {product.highlights.map((highlight) => (
-                    <li key={highlight} className="text-gray-400">
-                      <span className="text-gray-600">{highlight}</span>
+                  {highlights.map((item, idx) => (
+                    <li key={idx} className="text-gray-400">
+                      <span className="text-gray-600">{item.highlight}</span>
                     </li>
                   ))}
                 </ul>
@@ -216,7 +226,10 @@ export async function getStaticProps({ params }: { params: { name: string } }) {
   const res = await axios.get(`http://localhost:3000/api/items/${params.name}`)
   const data:any = res.data
   console.log(data)
-  // Pass post data to the page via props
-  return { props: { data } }
+  return { props: { 
+    product:data.currentProduct,
+    highlights: data.highlights,
+    images: data.images
+   } }
 }
 

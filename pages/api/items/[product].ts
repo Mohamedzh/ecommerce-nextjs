@@ -21,15 +21,15 @@ const getSheets = async (
       sheetsToExtract: ["items", "highlights", "images"],
     },
     function (err: Error, data: any) {
-      if(req.query.product){
+      if (req.query.product) {
         console.log(req.query.product)
-        let products = data.items.filter((item:Product)=>item.id===req.query.product)
-        let highlights =data.highlights.filter((item:Product)=>item.id===req.query.product)
-        let images =data.images.filter((item:Product)=>item.id===req.query.product)
-      const currentProduct = data.items.find((item: Product) => item.id === req.query.product)
-      console.log(currentProduct)
-      const arr = data.items
-      res.status(200).send({ currentProduct, highlights, images  })}
+        let products = data.items.filter((item: Product) => item.id === req.query.product)
+        let highlights = data.highlights.filter((item: Product) => item.id === req.query.product)
+        let images = data.images.filter((item: Product) => item.id === req.query.product)
+        const currentProduct = data.items.find((item: Product) => item.id === req.query.product)
+        const arr = data.items
+        res.status(200).send({ currentProduct, highlights, images })
+      }
     }
   );
 }

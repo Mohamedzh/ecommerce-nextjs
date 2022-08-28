@@ -20,10 +20,10 @@ const getSheets = async (
       sheetsToExtract: ["items", "highlights", "images"],
     },
     function (err: Error, data: any) {
-    
-    let products = data.items.filter((item:Product)=>item.id==="1")
-    let highlights =data.highlights.filter((item:Product)=>item.id==="1")
-    let images =data.images.filter((item:Product)=>item.id==="1")
+
+      let products = data.items.filter((item: Product) => item.id === "1")
+      let highlights = data.highlights.filter((item: Product) => item.id === "1")
+      let images = data.images.filter((item: Product) => item.id === "1")
 
       res.status(200).send({ products, highlights, images })
     }

@@ -165,3 +165,18 @@ export const navigation = {
     details:
       'The 6-Pack includes two black, two white, and two heather gray Basic Tees. Sign up for our subscription service and be the first to get new, exciting colors, like our upcoming "Charcoal Gray" limited release.',
   }
+
+  export const deliveryMethods = [
+    {
+      id: 1,
+      title: 'Standard',
+      turnaround: '4–10 business days',
+      price: '5',
+    },
+    { id: 2, title: 'Express', turnaround: '2–5 business days', price: '16' },
+  ]
+  export const paymentMethods = [
+    { id: 'credit-card', title: 'Credit card' },
+    { id: 'paypal', title: 'PayPal' },
+    { id: 'etransfer', title: 'eTransfer' },
+  ]

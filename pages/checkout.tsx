@@ -1,36 +1,73 @@
 import { RadioGroup } from '@headlessui/react'
 import { CheckCircleIcon, TrashIcon } from '@heroicons/react/solid'
-import { subtotal, updateQty } from 'components/Data/functions'
+import { deliveryMethods, paymentMethods } from 'components/Data/data'
+import { saveOrder, sendOrderEmail, subtotal, updateQty } from 'components/Data/functions'
 import Dropdown from 'components/dropdown'
 import Layout from 'components/layout'
 import { useAppSelector } from 'components/Redux/hooks'
 import { classNames } from 'lib'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useDispatch } from 'react-redux'
+import { useFormik } from 'formik'
+import * as Yup from 'yup'
+import { v4 as uuidv4 } from 'uuid';
+import { emptyCart, removeFromCart } from 'components/Redux/Slices/cartSlice'
 
-const deliveryMethods = [
-  {
-    id: 1,
-    title: 'Standard',
-    turnaround: '4–10 business days',
-    price: '5',
-  },
-  { id: 2, title: 'Express', turnaround: '2–5 business days', price: '16' },
-]
-const paymentMethods = [
-  { id: 'credit-card', title: 'Credit card' },
-  { id: 'paypal', title: 'PayPal' },
-  { id: 'etransfer', title: 'eTransfer' },
-]
+
 
 export default function Example() {
   const dispatch = useDispatch()
-  const cart = useAppSelector(state=>state.cart)
+  const cart = useAppSelector(state => state.cart)
   let tax = 5.52
   const [open, setOpen] = useState(false)
   const [selectedDeliveryMethod, setSelectedDeliveryMethod] = useState(
     deliveryMethods[0]
   )
+  const [selectedPaymentMethod, setPaymentMethod] = useState<string>(paymentMethods[0].title)
+
+  const formik = useFormik({
+    initialValues: {
+      emailAddress: '',
+      firstName: '',
+      lastName: '',
+      company: '',
+      address: '',
+      apartment: '',
+      city: '',
+      country: 'United States',
+      region: '',
+      postalCode: '',
+      phone: '',
+    },
+    onSubmit: async (values) => {
+      if (cart.length === 0) {
+        alert('Your cart is empty')
+      } else {
+        const orderId = uuidv4()
+        const reqBody = {
+          ...values, orderId, cart,
+          selectedDeliveryMethod: selectedDeliveryMethod.title, selectedPaymentMethod
+        }
+        await sendOrderEmail({email: values.emailAddress, orderId})
+        await saveOrder(reqBody, {email: values.emailAddress, orderId})
+        dispatch(emptyCart())
+        formik.resetForm()
+      }
+    },
+    validationSchema:
+      Yup.object({
+        emailAddress: Yup.string().required("Please enter your email"),
+        firstName: Yup.string().required("Please enter your first name"),
+        lastName: Yup.string().required("Please enter your last name"),
+        company: Yup.string().required("Please enter your company"),
+        address: Yup.string().required("Please enter your address"),
+        apartment: Yup.string().required("Please enter your apartment number"),
+        city: Yup.string().required("Please specify your city"),
+        region: Yup.string().required("Please specify your region"),
+        postalCode: Yup.string().required("Please enter your postal code"),
+        phone: Yup.string().required("Please enter your phone number")
+      }),
+  })
 
   return (
     <Layout>
@@ -48,7 +85,7 @@ export default function Example() {
 
                   <div className="mt-4">
                     <label
-                      htmlFor="email-address"
+                      htmlFor="emailAddress"
                       className="block text-sm font-medium text-gray-700"
                     >
                       Email address
@@ -56,11 +93,17 @@ export default function Example() {
                     <div className="mt-1">
                       <input
                         type="email"
-                        id="email-address"
-                        name="email-address"
+                        id="emailAddress"
+                        name="emailAddress"
                         autoComplete="email"
+                        value={formik.values.emailAddress}
+                        onChange={formik.handleChange}
+                        onBlur={formik.handleBlur}
                         className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                       />
+                      {formik.touched.emailAddress && formik.errors.emailAddress ? (
+                        <span className="errorText">{formik.errors.emailAddress}</span>
+                      ) : null}
                     </div>
                   </div>
                 </div>
@@ -73,7 +116,7 @@ export default function Example() {
                   <div className="mt-4 grid grid-cols-1 gap-y-6 sm:grid-cols-2 sm:gap-x-4">
                     <div>
                       <label
-                        htmlFor="first-name"
+                        htmlFor="firstName"
                         className="block text-sm font-medium text-gray-700"
                       >
                         First name
@@ -81,17 +124,23 @@ export default function Example() {
                       <div className="mt-1">
                         <input
                           type="text"
-                          id="first-name"
-                          name="first-name"
+                          id="firstName"
+                          name="firstName"
                           autoComplete="given-name"
+                          value={formik.values.firstName}
+                          onChange={formik.handleChange}
+                          onBlur={formik.handleBlur}
                           className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                         />
+                        {formik.touched.firstName && formik.errors.firstName ? (
+                          <span className="errorText">{formik.errors.firstName}</span>
+                        ) : null}
                       </div>
                     </div>
 
                     <div>
                       <label
-                        htmlFor="last-name"
+                        htmlFor="lastName"
                         className="block text-sm font-medium text-gray-700"
                       >
                         Last name
@@ -99,11 +148,17 @@ export default function Example() {
                       <div className="mt-1">
                         <input
                           type="text"
-                          id="last-name"
-                          name="last-name"
+                          id="lastName"
+                          name="lastName"
                           autoComplete="family-name"
+                          value={formik.values.lastName}
+                          onChange={formik.handleChange}
+                          onBlur={formik.handleBlur}
                           className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                         />
+                        {formik.touched.lastName && formik.errors.lastName ? (
+                          <span className="errorText">{formik.errors.lastName}</span>
+                        ) : null}
                       </div>
                     </div>
 
@@ -119,8 +174,14 @@ export default function Example() {
                           type="text"
                           name="company"
                           id="company"
+                          value={formik.values.company}
+                          onChange={formik.handleChange}
+                          onBlur={formik.handleBlur}
                           className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                         />
+                        {formik.touched.company && formik.errors.company ? (
+                          <span className="errorText">{formik.errors.company}</span>
+                        ) : null}
                       </div>
                     </div>
 
@@ -137,8 +198,14 @@ export default function Example() {
                           name="address"
                           id="address"
                           autoComplete="street-address"
+                          value={formik.values.address}
+                          onChange={formik.handleChange}
+                          onBlur={formik.handleBlur}
                           className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                         />
+                        {formik.touched.address && formik.errors.address ? (
+                          <span className="errorText">{formik.errors.address}</span>
+                        ) : null}
                       </div>
                     </div>
 
@@ -154,8 +221,14 @@ export default function Example() {
                           type="text"
                           name="apartment"
                           id="apartment"
+                          value={formik.values.apartment}
+                          onChange={formik.handleChange}
+                          onBlur={formik.handleBlur}
                           className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                         />
+                        {formik.touched.apartment && formik.errors.apartment ? (
+                          <span className="errorText">{formik.errors.apartment}</span>
+                        ) : null}
                       </div>
                     </div>
 
@@ -172,8 +245,14 @@ export default function Example() {
                           name="city"
                           id="city"
                           autoComplete="address-level2"
+                          value={formik.values.city}
+                          onChange={formik.handleChange}
+                          onBlur={formik.handleBlur}
                           className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                         />
+                        {formik.touched.city && formik.errors.city ? (
+                          <span className="errorText">{formik.errors.city}</span>
+                        ) : null}
                       </div>
                     </div>
 
@@ -189,6 +268,9 @@ export default function Example() {
                           id="country"
                           name="country"
                           autoComplete="country-name"
+                          value={formik.values.country}
+                          onChange={formik.handleChange}
+                          onBlur={formik.handleBlur}
                           className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                         >
                           <option>United States</option>
@@ -211,14 +293,20 @@ export default function Example() {
                           name="region"
                           id="region"
                           autoComplete="address-level1"
+                          value={formik.values.region}
+                          onChange={formik.handleChange}
+                          onBlur={formik.handleBlur}
                           className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                         />
+                        {formik.touched.region && formik.errors.region ? (
+                          <span className="errorText">{formik.errors.region}</span>
+                        ) : null}
                       </div>
                     </div>
 
                     <div>
                       <label
-                        htmlFor="postal-code"
+                        htmlFor="postalCode"
                         className="block text-sm font-medium text-gray-700"
                       >
                         Postal code
@@ -226,11 +314,17 @@ export default function Example() {
                       <div className="mt-1">
                         <input
                           type="text"
-                          name="postal-code"
-                          id="postal-code"
-                          autoComplete="postal-code"
+                          name="postalCode"
+                          id="postalCode"
+                          autoComplete="postalCode"
+                          value={formik.values.postalCode}
+                          onChange={formik.handleChange}
+                          onBlur={formik.handleBlur}
                           className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                         />
+                        {formik.touched.postalCode && formik.errors.postalCode ? (
+                          <span className="errorText">{formik.errors.postalCode}</span>
+                        ) : null}
                       </div>
                     </div>
 
@@ -247,8 +341,14 @@ export default function Example() {
                           name="phone"
                           id="phone"
                           autoComplete="tel"
+                          value={formik.values.phone}
+                          onChange={formik.handleChange}
+                          onBlur={formik.handleBlur}
                           className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                         />
+                        {formik.touched.phone && formik.errors.phone ? (
+                          <span className="errorText">{formik.errors.phone}</span>
+                        ) : null}
                       </div>
                     </div>
                   </div>
@@ -341,6 +441,7 @@ export default function Example() {
                           {paymentMethodIdx === 0 ? (
                             <input
                               id={paymentMethod.id}
+                              onClick={() => setPaymentMethod(paymentMethod.title)}
                               name="payment-type"
                               type="radio"
                               defaultChecked
@@ -349,6 +450,7 @@ export default function Example() {
                           ) : (
                             <input
                               id={paymentMethod.id}
+                              onClick={() => setPaymentMethod(paymentMethod.title)}
                               name="payment-type"
                               type="radio"
                               className="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-500"
@@ -485,6 +587,7 @@ export default function Example() {
                               <button
                                 type="button"
                                 className="-m-2.5 flex items-center justify-center bg-white p-2.5 text-gray-400 hover:text-gray-500"
+                                onClick={()=>{dispatch(removeFromCart(product))}}
                               >
                                 <span className="sr-only">Remove</span>
                                 <TrashIcon
@@ -513,7 +616,7 @@ export default function Example() {
                                   Array(Number(product.availableQty)),
                                   (_, i) => i + 1
                                 )}
-                                Qty = {product.quantity}
+                                Qty={product.quantity}
 
                               />
                             </div>
@@ -544,15 +647,16 @@ export default function Example() {
                     <div className="flex items-center justify-between border-t border-gray-200 pt-6">
                       <dt className="text-base font-medium">Total</dt>
                       <dd className="text-base font-medium text-gray-900">
-                        ${subtotal(cart)+tax+Number(selectedDeliveryMethod.price)}
+                        ${subtotal(cart) + tax + Number(selectedDeliveryMethod.price)}
                       </dd>
                     </div>
                   </dl>
 
                   <div className="border-t border-gray-200 py-6 px-4 sm:px-6">
                     <button
-                      type="submit"
+                      type="button"
                       className="w-full rounded-md border border-transparent bg-indigo-600 py-3 px-4 text-base font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-gray-50"
+                      onClick={() => formik.handleSubmit()}
                     >
                       Confirm order
                     </button>

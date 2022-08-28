@@ -43,3 +43,20 @@ export type Image = {
   src: string
   alt: string
 }
+
+export type reqBody = { 
+  emailAddress: string
+  firstName: string
+  lastName: string
+  company: string
+  address: string
+  apartment: string
+  city: string
+  country: string
+  region: string
+  postalCode: string
+  phone: string
+  selectedDeliveryMethod: string
+  selectedPaymentMethod: string
+  orderId: string
+}

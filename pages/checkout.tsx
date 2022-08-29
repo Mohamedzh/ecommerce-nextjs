@@ -12,6 +12,7 @@ import { useFormik } from 'formik'
 import * as Yup from 'yup'
 import { v4 as uuidv4 } from 'uuid';
 import { emptyCart, removeFromCart } from 'components/Redux/Slices/cartSlice'
+import { CartItem } from 'types'
 
 
 
@@ -24,6 +25,9 @@ export default function Example() {
     deliveryMethods[0]
   )
   const [selectedPaymentMethod, setPaymentMethod] = useState<string>(paymentMethods[0].title)
+  const [currentCart, setCurrentCart] = useState<CartItem[]>([])
+
+  useEffect(() => { setCurrentCart(cart) }, [cart])
 
   const formik = useFormik({
     initialValues: {
@@ -48,8 +52,8 @@ export default function Example() {
           ...values, orderId, cart,
           selectedDeliveryMethod: selectedDeliveryMethod.title, selectedPaymentMethod
         }
-        await sendOrderEmail({email: values.emailAddress, orderId})
-        await saveOrder(reqBody, {email: values.emailAddress, orderId})
+        await sendOrderEmail({ email: values.emailAddress, orderId })
+        await saveOrder(reqBody, { email: values.emailAddress, orderId })
         dispatch(emptyCart())
         formik.resetForm()
       }
@@ -553,7 +557,7 @@ export default function Example() {
                 <div className="mt-4 rounded-lg border border-gray-200 bg-white shadow-sm">
                   <h3 className="sr-only">Items in your cart</h3>
                   <ul role="list" className="divide-y divide-gray-200">
-                    {cart.map((product) => (
+                    {currentCart.map((product) => (
                       <li key={product.id} className="flex py-6 px-4 sm:px-6">
                         <div className="flex-shrink-0">
                           <img
@@ -574,20 +578,22 @@ export default function Example() {
                                   {product.name}
                                 </a>
                               </h4>
-                              <p className="mt-1 text-sm text-gray-500">
-                                {product.color}
-                              </p>
-                              {/* size */}
-                              {/* <p className="mt-1 text-sm text-gray-500">
-                                {product.name}
-                              </p> */}
+                              <div className="mt-1 flex text-sm">
+                                <p className="text-sm text-gray-500">
+                                  {product.color}
+                                </p>
+                                {product.size ? (
+                                  <p className="ml-4 pl-4 border-l border-gray-200 text-gray-500">{product.size}</p>
+                                ) : null}
+                              </div>
                             </div>
+
 
                             <div className="ml-4 flow-root flex-shrink-0">
                               <button
                                 type="button"
                                 className="-m-2.5 flex items-center justify-center bg-white p-2.5 text-gray-400 hover:text-gray-500"
-                                onClick={()=>{dispatch(removeFromCart(product))}}
+                                onClick={() => { dispatch(removeFromCart(product)) }}
                               >
                                 <span className="sr-only">Remove</span>
                                 <TrashIcon

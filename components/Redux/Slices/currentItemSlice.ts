@@ -7,12 +7,11 @@ export const currentItemSlice = createSlice({
     name: "item",
     initialState,
     reducers: {
-        getCurrentItem: (state, action:PayloadAction<Product>)=>{
-                return action.payload
+        getCurrentItem: (state, action: PayloadAction<Product>) => {
+            return action.payload
         }
-  
     },
-  });
+});
 
-  export const {getCurrentItem} = currentItemSlice.actions
-  export default currentItemSlice.reducer
+export const { getCurrentItem } = currentItemSlice.actions
+export default currentItemSlice.reducer

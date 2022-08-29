@@ -4,15 +4,24 @@ export interface Product {
   href: string
   color: string
   price: string
-  availableQty: number
+  availableQty: string
   imageSrc: string
   imageAlt: string
   description: string
   details: string
 }
 
+export interface DetailedProduct extends Product {
+  colors: Color[]
+  sizes: Size[]
+  images: Image[]
+  highlights: Highlights[]
+  quantities:Quantity[]
+}
+
 export interface CartItem extends Product {
   quantity: number
+  size: string
 }
 
 export type Category = {
@@ -26,8 +35,8 @@ export type AppStateType = {
 }
 
 export type Page = {
-    name: string;
-    href: string;
+  name: string;
+  href: string;
 }
 export type Navigation = {
   categories: Category[]
@@ -35,7 +44,7 @@ export type Navigation = {
 
 export type Highlights = {
   id: string
-  highlight:string
+  highlight: string
 }
 
 export type Image = {
@@ -44,7 +53,20 @@ export type Image = {
   alt: string
 }
 
-export type reqBody = { 
+export type Color = {
+  id: string,
+  name: string,
+  class: string,
+  selectedClass: string
+}
+
+export type Size = {
+  id: string,
+  name: string,
+  inStock: boolean
+}
+
+export type reqBody = {
   emailAddress: string
   firstName: string
   lastName: string
@@ -59,4 +81,11 @@ export type reqBody = {
   selectedDeliveryMethod: string
   selectedPaymentMethod: string
   orderId: string
+}
+
+export interface Quantity{
+  id: string
+  color: string
+  size: string
+  qty:string
 }

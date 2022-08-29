@@ -1,4 +1,3 @@
-/* This example requires Tailwind CSS v2.0+ */
 import { Dialog, Transition } from '@headlessui/react'
 import { XIcon } from '@heroicons/react/outline'
 import { Fragment, useEffect } from 'react'
@@ -16,8 +15,7 @@ type props = {
 }
 
 export default function ShoppingCartDrawer({ open, setOpen }: props) {
-  const cart = useAppSelector(state=>state.cart)
-  useEffect(()=>{console.log(cart),[cart]})
+  const cart = useAppSelector(state => state.cart)
   const dispatch = useDispatch()
   return (
     <Transition.Root show={open} as={Fragment}>
@@ -87,17 +85,22 @@ export default function ShoppingCartDrawer({ open, setOpen }: props) {
                                     <div className="flex justify-between text-base font-medium text-gray-900">
                                       <h3>
                                         <Link href={product.href}>
-                                        <a>
-                                          {' '}
-                                          {product.name}{' '}
-                                        </a>
+                                          <a>
+                                            {' '}
+                                            {product.name}{' '}
+                                          </a>
                                         </Link>
                                       </h3>
                                       <p className="ml-4">${product.price}.00</p>
                                     </div>
-                                    <p className="mt-1 text-sm text-gray-500">
-                                      {product.color}
-                                    </p>
+                                    <div className="mt-1 flex text-sm">
+                                      <p className="text-sm text-gray-500">
+                                        {product.color}
+                                      </p>
+                                      {product.size ? (
+                                        <p className="ml-4 pl-4 border-l border-gray-200 text-gray-500">{product.size}</p>
+                                      ) : null}
+                                    </div>
                                   </div>
                                   <div className="flex flex-1 items-end justify-between text-sm">
                                     <p className="text-gray-500">
@@ -110,7 +113,7 @@ export default function ShoppingCartDrawer({ open, setOpen }: props) {
                                           Array(Number(product.availableQty)),
                                           (_, i) => i + 1
                                         )}
-                                        Qty = {product.quantity}
+                                        Qty={product.quantity}
                                       />
                                     </p>
 
@@ -118,7 +121,7 @@ export default function ShoppingCartDrawer({ open, setOpen }: props) {
                                       <button
                                         type="button"
                                         className="font-medium text-indigo-600 hover:text-indigo-500"
-                                        onClick={()=>{dispatch(removeFromCart(product))}}
+                                        onClick={() => { dispatch(removeFromCart(product)) }}
                                       >
                                         Remove
                                       </button>
@@ -142,11 +145,11 @@ export default function ShoppingCartDrawer({ open, setOpen }: props) {
                       </p>
                       <div className="mt-6">
                         <Link href='/checkout'>
-                        <a
-                          className="flex items-center justify-center rounded-md border border-transparent bg-indigo-600 px-6 py-3 text-base font-medium text-white shadow-sm hover:bg-indigo-700"
-                        >
-                          Checkout
-                        </a>
+                          <a
+                            className="flex items-center justify-center rounded-md border border-transparent bg-indigo-600 px-6 py-3 text-base font-medium text-white shadow-sm hover:bg-indigo-700"
+                          >
+                            Checkout
+                          </a>
                         </Link>
                       </div>
                       <div className="mt-6 flex justify-center text-center text-sm text-gray-500">

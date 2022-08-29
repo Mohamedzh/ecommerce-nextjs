@@ -1,25 +1,35 @@
 import { StarIcon } from '@heroicons/react/solid'
 import Layout from 'components/layout'
 import { classNames } from 'lib'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { reviews } from '../../components/Data/data'
 import axios from 'axios'
-import { Highlights, Image, Product } from 'types'
+import { Color, DetailedProduct, Highlights, Image, Product, Size } from 'types'
 import { addToCart } from 'components/Redux/Slices/cartSlice'
 import { useDispatch } from 'react-redux'
+import { RadioGroup } from '@headlessui/react'
 
 type Props = {
-  product: Product,
-  highlights: Highlights[],
-  images: Image[]
+  product: DetailedProduct,
 }
 
-
-export default function ProductPage({ product, highlights, images }: Props) {
+export default function ProductPage({ product }: Props) {
   const dispatch = useDispatch()
   const [open, setOpen] = useState(false)
-  // const [selectedColor, setSelectedColor] = useState(product.colors[0])
-  // const [selectedSize, setSelectedSize] = useState(product.sizes[2])
+  const [selectedColor, setSelectedColor] = useState(product.colors[0])
+  const [selectedSize, setSelectedSize] = useState(product.sizes[2])
+
+  let currentTheme = product.quantities.find(theme => theme.color === selectedColor.name && theme.size === selectedSize.name)
+
+  const [selectedQuantity, setSelectedQuantity] = useState<string>(currentTheme!.qty)
+
+  useEffect(() => {
+    console.log(selectedQuantity)
+    if (currentTheme) {
+      setSelectedQuantity(currentTheme.qty)
+      // dispatch()
+    }
+  }, [selectedSize, selectedColor])
 
   return (
     <Layout>
@@ -28,31 +38,31 @@ export default function ProductPage({ product, highlights, images }: Props) {
         <div className="mx-auto mt-6 max-w-2xl sm:px-6 lg:grid lg:max-w-7xl lg:grid-cols-3 lg:gap-x-8 lg:px-8">
           <div className="aspect-w-3 aspect-h-4 hidden overflow-hidden rounded-lg lg:block">
             <img
-              src={images[0].src}
-              alt={images[0].alt}
+              src={product.images[0].src}
+              alt={product.images[0].alt}
               className="h-full w-full object-cover object-center"
             />
           </div>
           <div className="hidden lg:grid lg:grid-cols-1 lg:gap-y-8">
             <div className="aspect-w-3 aspect-h-2 overflow-hidden rounded-lg">
               <img
-                src={images[1].src}
-                alt={images[1].alt}
+                src={product.images[1].src}
+                alt={product.images[1].alt}
                 className="h-full w-full object-cover object-center"
               />
             </div>
             <div className="aspect-w-3 aspect-h-2 overflow-hidden rounded-lg">
               <img
-                src={images[2].src}
-                alt={images[2].alt}
+                src={product.images[2].src}
+                alt={product.images[2].alt}
                 className="h-full w-full object-cover object-center"
               />
             </div>
           </div>
           <div className="aspect-w-4 aspect-h-5 sm:overflow-hidden sm:rounded-lg lg:aspect-w-3 lg:aspect-h-4">
             <img
-              src={images[3].src}
-              alt={images[3].alt}
+              src={product.images[3].src}
+              alt={product.images[3].alt}
               className="h-full w-full object-cover object-center"
             />
           </div>
@@ -94,12 +104,108 @@ export default function ProductPage({ product, highlights, images }: Props) {
             </div>
 
             <form className="mt-10">
+              {/* Colors */}
+              <div>
+                <h3 className="text-sm text-gray-900 font-medium">Color</h3>
 
+                <RadioGroup value={selectedColor} onChange={setSelectedColor} className="mt-4">
+                  <RadioGroup.Label className="sr-only">Choose a color</RadioGroup.Label>
+                  <div className="flex items-center space-x-3">
+                    {product.colors.map((color) => (
+                      <RadioGroup.Option
+                        key={color.name}
+                        value={color}
+                        className={({ active, checked }) =>
+                          classNames(
+                            color.selectedClass,
+                            active && checked ? 'ring ring-offset-1' : '',
+                            !active && checked ? 'ring-2' : '',
+                            '-m-0.5 relative p-0.5 rounded-full flex items-center justify-center cursor-pointer focus:outline-none'
+                          )
+                        }
+                      >
+                        <RadioGroup.Label as="span" className="sr-only">
+                          {color.name}
+                        </RadioGroup.Label>
+                        <span
+                          aria-hidden="true"
+                          className={classNames(
+                            color.class,
+                            'h-8 w-8 border border-black border-opacity-10 rounded-full'
+                          )}
+                        />
+                      </RadioGroup.Option>
+                    ))}
+                  </div>
+                </RadioGroup>
+              </div>
+
+              {/* Sizes */}
+              <div className="mt-10">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm text-gray-900 font-medium">Size</h3>
+                  <a href="#" className="text-sm font-medium text-indigo-600 hover:text-indigo-500">
+                    Size guide
+                  </a>
+                </div>
+
+                <RadioGroup value={selectedSize} onChange={setSelectedSize} className="mt-4">
+                  <RadioGroup.Label className="sr-only">Choose a size</RadioGroup.Label>
+                  <div className="grid grid-cols-4 gap-4 sm:grid-cols-8 lg:grid-cols-4">
+                    {product.sizes.map((size) => (
+                      <RadioGroup.Option
+                        key={size.name}
+                        value={size}
+                        disabled={!size.inStock}
+                        className={({ active }) =>
+                          classNames(
+                            size.inStock
+                              ? 'bg-white shadow-sm text-gray-900 cursor-pointer'
+                              : 'bg-gray-50 text-gray-200 cursor-not-allowed',
+                            active ? 'ring-2 ring-indigo-500' : '',
+                            'group relative border rounded-md py-3 px-4 flex items-center justify-center text-sm font-medium uppercase hover:bg-gray-50 focus:outline-none sm:flex-1 sm:py-6'
+                          )
+                        }
+                      >
+                        {({ active, checked }) => (
+                          <>
+                            <RadioGroup.Label as="span">{size.name}</RadioGroup.Label>
+                            {size.inStock ? (
+                              <span
+                                className={classNames(
+                                  active ? 'border' : 'border-2',
+                                  checked ? 'border-indigo-500' : 'border-transparent',
+                                  'absolute -inset-px rounded-md pointer-events-none'
+                                )}
+                                aria-hidden="true"
+                              />
+                            ) : (
+                              <span
+                                aria-hidden="true"
+                                className="absolute -inset-px rounded-md border-2 border-gray-200 pointer-events-none"
+                              >
+                                <svg
+                                  className="absolute inset-0 w-full h-full text-gray-200 stroke-2"
+                                  viewBox="0 0 100 100"
+                                  preserveAspectRatio="none"
+                                  stroke="currentColor"
+                                >
+                                  <line x1={0} y1={100} x2={100} y2={0} vectorEffect="non-scaling-stroke" />
+                                </svg>
+                              </span>
+                            )}
+                          </>
+                        )}
+                      </RadioGroup.Option>
+                    ))}
+                  </div>
+                </RadioGroup>
+              </div>
 
               <button
                 type="submit"
                 className="mt-10 flex w-full items-center justify-center rounded-md border border-transparent bg-indigo-600 py-3 px-8 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-                onClick={(e)=>{dispatch(addToCart(product)); e.preventDefault()}}
+                onClick={(e) => { dispatch(addToCart({ product, color: selectedColor.name, size: selectedSize.name, availableQty: selectedQuantity })); e.preventDefault() }}
               >
                 Add to bag
               </button>
@@ -121,7 +227,7 @@ export default function ProductPage({ product, highlights, images }: Props) {
 
               <div className="mt-4">
                 <ul role="list" className="list-disc space-y-2 pl-4 text-sm">
-                  {highlights.map((item, idx) => (
+                  {product.highlights.map((item, idx) => (
                     <li key={idx} className="text-gray-400">
                       <span className="text-gray-600">{item.highlight}</span>
                     </li>
@@ -208,28 +314,22 @@ export default function ProductPage({ product, highlights, images }: Props) {
 }
 
 export async function getStaticPaths() {
-  // Call an external API endpoint to get posts
   const res = await axios.get('http://localhost:3000/api/items')
   const items = res.data.data.items
-  // Get the paths we want to pre-render based on posts
   const paths = items.map((item: Product) => ({
     params: { name: item.id },
   }))
-
-  // We'll pre-render only these paths at build time.
-  // { fallback: false } means other routes should 404.
   return { paths, fallback: false }
 }
 
 export async function getStaticProps({ params }: { params: { name: string } }) {
 
   const res = await axios.get(`http://localhost:3000/api/items/${params.name}`)
-  const data:any = res.data
-  console.log(data)
-  return { props: { 
-    product:data.currentProduct,
-    highlights: data.highlights,
-    images: data.images
-   } }
+  const data: any = res.data
+  return {
+    props: {
+      product: data.currentProduct,
+    }
+  }
 }
 

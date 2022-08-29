@@ -17,7 +17,6 @@ export const getProducts = async (dispatch: Dispatch) => {
 export const getProductDetails = async (id: string, dispatch: Dispatch) => {
     try {
         const res = await axios.get(`http://localhost:3000/api/items/${id}`)
-        console.log(res.data.currentProduct)
         dispatch(getCurrentItem(res.data.currentProduct))
     } catch (error) {
         console.log(error)

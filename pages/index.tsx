@@ -83,7 +83,6 @@ const Home: NextPage = () => {
 
   const trendingProducts = useAppSelector(state => state.item)
   const thisProduct = useAppSelector(state => state.currentItem)
-  console.log(thisProduct)
 
   return (
     <div className="">
@@ -232,7 +231,7 @@ const Home: NextPage = () => {
                       {product.color}
                     </p>
                     <p className="mt-1 text-sm font-medium text-gray-900">
-                      {product.price}
+                      ${product.price}.00
                     </p>
                   </div>
                 ))}

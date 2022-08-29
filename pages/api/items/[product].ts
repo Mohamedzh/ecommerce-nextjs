@@ -1,7 +1,7 @@
 import { GoogleSpreadsheet } from 'google-spreadsheet'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { extractSheets } from "spreadsheet-to-json"
-import { Product } from 'types'
+import { Product, Size } from 'types'
 
 
 
@@ -18,17 +18,23 @@ const getSheets = async (
     {
       spreadsheetKey: process.env.sheet_key,
       credentials: credentials2,
-      sheetsToExtract: ["items", "highlights", "images"],
+      sheetsToExtract: ["items", "highlights", "images", "colors", "sizes", "colorSizesQty"],
     },
     function (err: Error, data: any) {
       if (req.query.product) {
         console.log(req.query.product)
-        let products = data.items.filter((item: Product) => item.id === req.query.product)
         let highlights = data.highlights.filter((item: Product) => item.id === req.query.product)
         let images = data.images.filter((item: Product) => item.id === req.query.product)
-        const currentProduct = data.items.find((item: Product) => item.id === req.query.product)
-        const arr = data.items
-        res.status(200).send({ currentProduct, highlights, images })
+        let colors = data.colors.filter((item: Product) => item.id === req.query.product)
+        let newSizes = data.sizes.filter((item: Product) => item.id === req.query.product)
+        let sizes = newSizes.map((size:any)=>{
+          return {...size, inStock:JSON.parse(size.inStock)}
+        })
+
+        let quantities = data.colorSizesQty.filter((item: Product) => item.id === req.query.product)
+        let currentProduct = data.items.find((item: Product) => item.id === req.query.product)
+        currentProduct = { ...currentProduct, highlights, images, colors, sizes, quantities }
+        res.status(200).send({ currentProduct, highlights, images, colors, sizes, quantities })
       }
     }
   );

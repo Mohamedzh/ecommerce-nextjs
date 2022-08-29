@@ -6,7 +6,7 @@ type props = {
   onChange: (value: string) => void
   Qty:number
 }
-function Dropdown({ values, defaultValue = values[2], onChange, Qty }: props) {
+function Dropdown({ values, onChange, Qty }: props) {
   return (
     <select
       id="quantity"

@@ -1,14 +1,14 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { CartItem, Product } from "types";
+import { DetailedProduct, Product } from "types";
 
 
 interface AddedItem {
-    product: Product
+    product: DetailedProduct
     color: string
     size: string
     availableQty: string
 }
-const initialState: CartItem[] = [];
+const initialState: DetailedProduct[] = [];
 
 export const cartSlice = createSlice({
     name: "cart",
@@ -20,14 +20,18 @@ export const cartSlice = createSlice({
             console.log(item)
             console.log(newCartItem)
             if (item) {
-                if (item.quantity < +(action.payload.availableQty)){
-                [...state, item.quantity = item.quantity + 1]
-            }else{alert('maximum allowable quantity reached')}
+                if (item.quantity < +(action.payload.availableQty)) {
+                    [...state, item.quantity = item.quantity + 1]
+                } else { alert('maximum allowable quantity reached for this variant') }
             } else {
-                state.push({ ...action.payload.product, quantity: 1, color: action.payload.color, size: action.payload.size })
+                if (action.payload.availableQty === '0') {
+                    alert('no stock available for this variant')
+                } else {
+                    state.push({ ...action.payload.product, quantity: 1, color: action.payload.color, size: action.payload.size })
+                }
             }
         },
-        removeFromCart: (state, action: PayloadAction<CartItem>) => {
+        removeFromCart: (state, action: PayloadAction<DetailedProduct>) => {
             let index = state.indexOf(action.payload)
             state.splice(index, 1)
             // return state.filter(item => item.id !== action.payload.id)
@@ -40,8 +44,7 @@ export const cartSlice = createSlice({
         },
         emptyCart: (state) => {
             []
-        }
-
+        },
     },
 });
 

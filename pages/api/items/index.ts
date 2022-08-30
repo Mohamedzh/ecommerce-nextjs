@@ -1,6 +1,7 @@
-// Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { extractSheets } from "spreadsheet-to-json"
+import { Color, DetailedProduct, Highlights, Image, Product, Quantity, Size } from 'types';
+
 
 
 export default async function handler (
@@ -12,17 +13,21 @@ export default async function handler (
   )
   await extractSheets(
     {
-      // your google spreadhsheet key
-      spreadsheetKey: "1l2YilJsbBPG4d1hPX6PrVTXsqpUX06AEWIkh1Q6ecec",
-      // your google oauth2 credentials or API_KEY
-      
+      spreadsheetKey: process.env.sheet_key,
       credentials: credentials2,
-      // optional: names of the sheets you want to extract
-      sheetsToExtract: ["items"],
+      sheetsToExtract: ["items", "highlights", "images", "colors", "sizes", "colorSizesQty"],
     },
     function (err: Error, data: any) {
-      // console.log(data.items)
-      res.status(200).send({ data })
+      let detailedProducts = data.items.map((item:DetailedProduct)=>{
+        const images = data.images.filter((image:Image)=>image.id===item.id)
+        const highlights = data.highlights.filter((highlight:Highlights)=>highlight.id===item.id)
+        const colors = data.colors.filter((color:Color)=>color.id===item.id)
+        const sizes = data.sizes.filter((size:Size)=>size.id===item.id)
+        let quantities = data.colorSizesQty.filter((variant:Quantity) => variant.id === item.id)
+        return item = {...item, images, highlights, colors, sizes, quantities}
+      }
+        )
+      res.status(200).send( detailedProducts )
     }
   );
 

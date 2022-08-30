@@ -1,13 +1,14 @@
-import { Dialog, Transition } from '@headlessui/react'
+import { Dialog, RadioGroup, Transition } from '@headlessui/react'
 import { XIcon } from '@heroicons/react/outline'
 import { Fragment, useEffect } from 'react'
-import { CartItem, Product } from 'types'
+import { DetailedProduct, Product } from 'types'
 import Dropdown from './dropdown'
 import Link from 'next/link'
 import { useAppSelector } from './Redux/hooks'
 import { appendQty, removeFromCart } from './Redux/Slices/cartSlice'
 import { useDispatch } from 'react-redux'
 import { subtotal, updateQty } from './Data/functions'
+import { classNames } from 'lib'
 
 type props = {
   open: boolean
@@ -16,6 +17,7 @@ type props = {
 
 export default function ShoppingCartDrawer({ open, setOpen }: props) {
   const cart = useAppSelector(state => state.cart)
+  const currentQty = useAppSelector(state => state.qty)
   const dispatch = useDispatch()
   return (
     <Transition.Root show={open} as={Fragment}>
@@ -70,7 +72,7 @@ export default function ShoppingCartDrawer({ open, setOpen }: props) {
                             role="list"
                             className="-my-6 divide-y divide-gray-200"
                           >
-                            {cart.map((product) => (
+                            {cart.map((product: DetailedProduct) => (
                               <li key={product.id} className="flex py-6">
                                 <div className="h-24 w-24 flex-shrink-0 overflow-hidden rounded-md border border-gray-200">
                                   <img
@@ -94,6 +96,12 @@ export default function ShoppingCartDrawer({ open, setOpen }: props) {
                                       <p className="ml-4">${product.price}.00</p>
                                     </div>
                                     <div className="mt-1 flex text-sm">
+                                      <div>
+                                        <button
+                                          className={"inline-flex items-center rounded-full mx-2 pointer-events-none border p-2 " + `bg-${product.color.toLowerCase()}-500`}
+                                        >
+                                        </button>
+                                      </div>
                                       <p className="text-sm text-gray-500">
                                         {product.color}
                                       </p>
@@ -110,7 +118,7 @@ export default function ShoppingCartDrawer({ open, setOpen }: props) {
                                           // dispatch(appendQty({id:product.id, qty:+value}))
                                         }}
                                         values={Array.from(
-                                          Array(Number(product.availableQty)),
+                                          Array(Number(currentQty)),
                                           (_, i) => i + 1
                                         )}
                                         Qty={product.quantity}

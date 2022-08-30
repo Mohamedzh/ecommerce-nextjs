@@ -1,16 +1,13 @@
-import { GoogleSpreadsheet } from 'google-spreadsheet'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { extractSheets } from "spreadsheet-to-json"
-import { Product, Size } from 'types'
-
-
+import { Color, DetailedProduct, Highlights, Image, Product, Quantity, Size } from 'types'
 
 
 const getSheets = async (
   req: NextApiRequest,
   res: NextApiResponse
 ) => {
-  const { product } = req.query
+  const { id } = req.query
   const credentials2 = JSON.parse(
     Buffer.from(process.env.secret!, 'base64').toString()
   )
@@ -21,18 +18,18 @@ const getSheets = async (
       sheetsToExtract: ["items", "highlights", "images", "colors", "sizes", "colorSizesQty"],
     },
     function (err: Error, data: any) {
-      if (req.query.product) {
-        console.log(req.query.product)
-        let highlights = data.highlights.filter((item: Product) => item.id === req.query.product)
-        let images = data.images.filter((item: Product) => item.id === req.query.product)
-        let colors = data.colors.filter((item: Product) => item.id === req.query.product)
-        let newSizes = data.sizes.filter((item: Product) => item.id === req.query.product)
-        let sizes = newSizes.map((size:any)=>{
+      if (req.query.id) {
+        console.log(req.query.id)
+        let highlights = data.highlights.filter((item: Highlights) => item.id === req.query.id)
+        let images = data.images.filter((item: Image) => item.id === req.query.id)
+        let colors = data.colors.filter((item: Color) => item.id === req.query.id)
+        let newSizes = data.sizes.filter((item: Size) => item.id === req.query.id)
+        let sizes = newSizes.map((size:Size)=>{
           return {...size, inStock:JSON.parse(size.inStock)}
         })
 
-        let quantities = data.colorSizesQty.filter((item: Product) => item.id === req.query.product)
-        let currentProduct = data.items.find((item: Product) => item.id === req.query.product)
+        let quantities = data.colorSizesQty.filter((item: Quantity) => item.id === req.query.id)
+        let currentProduct = data.items.find((item: DetailedProduct) => item.id === req.query.id)
         currentProduct = { ...currentProduct, highlights, images, colors, sizes, quantities }
         res.status(200).send({ currentProduct, highlights, images, colors, sizes, quantities })
       }

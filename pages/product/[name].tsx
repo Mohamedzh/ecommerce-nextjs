@@ -8,6 +8,7 @@ import { Color, DetailedProduct, Highlights, Image, Product, Size } from 'types'
 import { addToCart } from 'components/Redux/Slices/cartSlice'
 import { useDispatch } from 'react-redux'
 import { RadioGroup } from '@headlessui/react'
+import { updateQty } from 'components/Redux/Slices/qtySlice'
 
 type Props = {
   product: DetailedProduct,
@@ -17,17 +18,16 @@ export default function ProductPage({ product }: Props) {
   const dispatch = useDispatch()
   const [open, setOpen] = useState(false)
   const [selectedColor, setSelectedColor] = useState(product.colors[0])
-  const [selectedSize, setSelectedSize] = useState(product.sizes[2])
+  const [selectedSize, setSelectedSize] = useState(product.sizes[0])
+
+  const [selectedQuantity, setSelectedQuantity] = useState<string>('0')
 
   let currentTheme = product.quantities.find(theme => theme.color === selectedColor.name && theme.size === selectedSize.name)
 
-  const [selectedQuantity, setSelectedQuantity] = useState<string>(currentTheme!.qty)
-
   useEffect(() => {
-    console.log(selectedQuantity)
     if (currentTheme) {
       setSelectedQuantity(currentTheme.qty)
-      // dispatch()
+      dispatch(updateQty(currentTheme.qty))
     }
   }, [selectedSize, selectedColor])
 
@@ -161,8 +161,8 @@ export default function ProductPage({ product }: Props) {
                           classNames(
                             size.inStock
                               ? 'bg-white shadow-sm text-gray-900 cursor-pointer'
-                              : 'bg-gray-50 text-gray-200 cursor-not-allowed',
-                            active ? 'ring-2 ring-indigo-500' : '',
+                              : 'bg-gray-50 text-gray-300 cursor-not-allowed',
+                            active ? 'ring-2 ring-indigo-500 bg-indigo-500 text-white hover:text-gray-900' : '',
                             'group relative border rounded-md py-3 px-4 flex items-center justify-center text-sm font-medium uppercase hover:bg-gray-50 focus:outline-none sm:flex-1 sm:py-6'
                           )
                         }
@@ -203,9 +203,9 @@ export default function ProductPage({ product }: Props) {
               </div>
 
               <button
-                type="submit"
+                type="button"
                 className="mt-10 flex w-full items-center justify-center rounded-md border border-transparent bg-indigo-600 py-3 px-8 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-                onClick={(e) => { dispatch(addToCart({ product, color: selectedColor.name, size: selectedSize.name, availableQty: selectedQuantity })); e.preventDefault() }}
+                onClick={() => { dispatch(addToCart({ product, color: selectedColor.name, size: selectedSize.name, availableQty: selectedQuantity })) }}
               >
                 Add to bag
               </button>
@@ -315,7 +315,7 @@ export default function ProductPage({ product }: Props) {
 
 export async function getStaticPaths() {
   const res = await axios.get('http://localhost:3000/api/items')
-  const items = res.data.data.items
+  const items = res.data
   const paths = items.map((item: Product) => ({
     params: { name: item.id },
   }))

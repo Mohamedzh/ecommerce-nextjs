@@ -3,14 +3,15 @@ import { configureStore } from "@reduxjs/toolkit";
 import cartSlice from './Slices/cartSlice'
 import itemSlice from './Slices/itemSlice'
 import currentItemSlice from './Slices/currentItemSlice'
+import qtySlice from './Slices/qtySlice'
 
 
 export const store = configureStore({
   reducer: {
     cart: cartSlice,
     item: itemSlice,
-    currentItem: currentItemSlice
-
+    currentItem: currentItemSlice,
+    qty: qtySlice
   }
 })
 

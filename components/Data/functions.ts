@@ -8,7 +8,7 @@ import { getItems } from '../Redux/Slices/itemSlice'
 export const getProducts = async (dispatch: Dispatch) => {
     try {
         const res = await axios.get('http://localhost:3000/api/items')
-        dispatch(getItems(res.data.data.items))
+        dispatch(getItems(res.data))
     } catch (error) {
         console.log(error)
     }

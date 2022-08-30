@@ -1,13 +1,13 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { CartItem } from "types";
+import { CartItem, DetailedProduct } from "types";
 
-const initialState: CartItem[] = [];
+const initialState: DetailedProduct[] = [];
 
 export const itemSlice = createSlice({
     name: "item",
     initialState,
     reducers: {
-        getItems: (state, action:PayloadAction<CartItem[]>)=>{
+        getItems: (state, action:PayloadAction<DetailedProduct[]>)=>{
                 return action.payload
         }
   

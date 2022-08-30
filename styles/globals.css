@@ -3,6 +3,10 @@
 @tailwind utilities;
 
 .errorText {
-    color: red;
-    font-size: small;
-  }
+  color: red;
+  font-size: small;
+}
+
+html {
+  overflow: auto !important;
+}

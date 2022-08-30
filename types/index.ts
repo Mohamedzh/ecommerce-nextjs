@@ -9,19 +9,17 @@ export interface Product {
   imageAlt: string
   description: string
   details: string
+  rating: string
 }
 
 export interface DetailedProduct extends Product {
+  quantity: number
+  size: string
   colors: Color[]
   sizes: Size[]
   images: Image[]
   highlights: Highlights[]
-  quantities:Quantity[]
-}
-
-export interface CartItem extends Product {
-  quantity: number
-  size: string
+  quantities: Quantity[]
 }
 
 export type Category = {
@@ -31,7 +29,7 @@ export type Category = {
 export type AppStateType = {
   products: Product[]
   categories: Category[]
-  cart: CartItem[]
+  cart: DetailedProduct[]
 }
 
 export type Page = {
@@ -63,7 +61,7 @@ export type Color = {
 export type Size = {
   id: string,
   name: string,
-  inStock: boolean
+  inStock: string
 }
 
 export type reqBody = {
@@ -83,9 +81,9 @@ export type reqBody = {
   orderId: string
 }
 
-export interface Quantity{
+export interface Quantity {
   id: string
   color: string
   size: string
-  qty:string
+  qty: string
 }

@@ -1,17 +1,28 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { Product } from "types";
+import { DetailedProduct, Product } from "types";
 
-const initialState = {};
+const initialState: Product = {
+    id: '',
+    name: '',
+    href: '',
+    color: '',
+    price: '',
+    availableQty: '',
+    imageSrc: '',
+    imageAlt: '',
+    description: '',
+    details: ''
+};
 
 export const currentItemSlice = createSlice({
-    name: "item",
+    name: "currentItem",
     initialState,
     reducers: {
-        getCurrentItem: (state, action: PayloadAction<Product>) => {
-            return action.payload
+        setCurrentItemId: (state, action: PayloadAction<string>) => {
+            state.id = action.payload
         }
     },
 });
 
-export const { getCurrentItem } = currentItemSlice.actions
+export const { setCurrentItemId } = currentItemSlice.actions
 export default currentItemSlice.reducer

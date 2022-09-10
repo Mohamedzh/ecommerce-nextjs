@@ -1,10 +1,10 @@
 import { Popover, Transition } from '@headlessui/react'
-import { MenuIcon, ShoppingBagIcon } from '@heroicons/react/outline'
+import { Bars3Icon, ShoppingBagIcon } from '@heroicons/react/24/outline'
 import { classNames } from 'lib'
 import { Fragment, useEffect, useState } from 'react'
 import Drawer from './drawer'
 import ShoppingCartDrawer from './shoppingCartDrawer'
-import {navigation} from './Data/data'
+import { navigation } from './Data/data'
 import Link from 'next/link'
 import { useAppSelector } from './Redux/hooks'
 
@@ -12,7 +12,7 @@ import { useAppSelector } from './Redux/hooks'
 function Header() {
   const [open, setOpen] = useState(false)
   const [openShoppingCart, setOpenShoppingCart] = useState(false)
-  const cart = useAppSelector(state=>state.cart)
+  const cart = useAppSelector(state => state.cart)
 
   return (
     <>
@@ -32,12 +32,12 @@ function Header() {
                 <div className="hidden lg:flex lg:flex-1 lg:items-center">
                   <Link href="/">
                     <a>
-                    <span className="sr-only">Workflow</span>
-                    <img
-                      className="h-8 w-auto"
-                      src="https://tailwindui.com/img/logos/workflow-mark.svg?color=indigo&shade=600"
-                      alt=""
-                    />
+                      <span className="sr-only">Workflow</span>
+                      <img
+                        className="h-8 w-auto"
+                        src="https://tailwindui.com/img/logos/workflow-mark.svg?color=indigo&shade=600"
+                        alt=""
+                      />
                     </a>
                   </Link>
                 </div>
@@ -154,20 +154,21 @@ function Header() {
                     onClick={() => setOpen(true)}
                   >
                     <span className="sr-only">Open menu</span>
-                    <MenuIcon className="h-6 w-6" aria-hidden="true" />
+                    <Bars3Icon className="h-6 w-6" aria-hidden="true" />
                   </button>
                 </div>
 
                 {/* Logo (lg-) */}
-                <a href="#" className="lg:hidden">
-                  <span className="sr-only">Workflow</span>
-                  <img
-                    src="https://tailwindui.com/img/logos/workflow-mark.svg?color=indigo&shade=600"
-                    alt=""
-                    className="h-8 w-auto"
-                  />
-                </a>
-
+                <Link href="/">
+                  <a className="lg:hidden">
+                    <span className="sr-only">Workflow</span>
+                    <img
+                      src="https://tailwindui.com/img/logos/workflow-mark.svg?color=indigo&shade=600"
+                      alt=""
+                      className="h-8 w-auto"
+                    />
+                  </a>
+                </Link>
                 <div className="flex flex-1 items-center justify-end">
                   <div
                     className="flex items-center lg:ml-8"

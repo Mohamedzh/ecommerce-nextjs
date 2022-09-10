@@ -2,7 +2,7 @@ import type { NextPage } from 'next'
 import Layout from 'components/layout'
 import { useEffect, useState } from 'react'
 import { useAppSelector } from 'components/Redux/hooks'
-import { getProductDetails, getProducts } from 'components/Data/functions'
+import { getProducts } from 'components/Data/functions'
 import { useDispatch } from 'react-redux'
 import Link from 'next/link'
 import PopUp from 'components/productPopUp'
@@ -126,12 +126,13 @@ const Home: NextPage = () => {
                   Mid-Season Sale
                 </h1>
                 <div className="mt-4 sm:mt-6">
+                <Link href="/product">
                   <a
-                    href="#"
                     className="inline-block rounded-md border border-transparent bg-indigo-600 py-3 px-8 font-medium text-white hover:bg-indigo-700"
                   >
                     Shop Collection
                   </a>
+                  </Link>
                 </div>
               </div>
             </div>
@@ -192,12 +193,13 @@ const Home: NextPage = () => {
                 >
                   Trending Products
                 </h2>
+                <Link href="/product">
                 <a
-                  href="#"
                   className="hidden text-sm font-medium text-indigo-600 hover:text-indigo-500 md:block"
                 >
                   Shop the collection<span aria-hidden="true"> &rarr;</span>
                 </a>
+                </Link>
               </div>
 
               <div className="mt-6 grid grid-cols-2 gap-x-4 gap-y-10 sm:gap-x-6 md:grid-cols-4 md:gap-y-0 lg:gap-x-8">
@@ -218,12 +220,12 @@ const Home: NextPage = () => {
                     </div>
 
                     <h3
-                      onClick={() => {setOpen(true); dispatch(setCurrentItemId(product.id))}}
+                      onClick={() => { setOpen(true); dispatch(setCurrentItemId(product.id)) }}
 
                       className="mt-4 text-sm text-gray-700 cursor-pointer">
                       {/* <Link href={product.href}> */}
                       {/* <a> */}
-                      <PopUp open={open} setOpen={setOpen} />
+                      <PopUp open={open} setOpen={setOpen}/>
 
                       <span className="absolute inset-0" />
                       {product.name}
@@ -241,12 +243,13 @@ const Home: NextPage = () => {
               </div>
 
               <div className="mt-8 text-sm md:hidden">
+              <Link href="/product">
                 <a
-                  href="#"
                   className="font-medium text-indigo-600 hover:text-indigo-500"
                 >
                   Shop the collection<span aria-hidden="true"> &rarr;</span>
                 </a>
+                </Link>
               </div>
             </div>
           </section>

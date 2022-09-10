@@ -14,10 +14,10 @@
   "resolved" "https://registry.npmjs.org/@headlessui/react/-/react-1.6.6.tgz"
   "version" "1.6.6"
 
-"@heroicons/react@^1.0.6":
-  "integrity" "sha512-JJCXydOFWMDpCP4q13iEplA503MQO3xLoZiKum+955ZCtHINWnx26CUxVxxFQu/uLb4LW3ge15ZpzIkXKkJ8oQ=="
-  "resolved" "https://registry.npmjs.org/@heroicons/react/-/react-1.0.6.tgz"
-  "version" "1.0.6"
+"@heroicons/react@^2.0.10":
+  "integrity" "sha512-Ufr+pgAElNiRCSklnHGOR10bXb02BLlosvbDK7sCRUMOcQ3R/HCXTfXs4BUkYZ4dKpx6l5dUD06VSW1dTpTEDw=="
+  "resolved" "https://registry.npmjs.org/@heroicons/react/-/react-2.0.10.tgz"
+  "version" "2.0.10"
 
 "@next/env@12.2.5":
   "integrity" "sha512-vLPLV3cpPGjUPT3PjgRj7e3nio9t6USkuew3JE/jMeon/9Mvp1WyR18v3iwnCuX7eUAm1HmAbJHHLAbcu/EJcw=="

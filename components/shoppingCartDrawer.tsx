@@ -1,5 +1,5 @@
 import { Dialog, RadioGroup, Transition } from '@headlessui/react'
-import { XIcon } from '@heroicons/react/outline'
+import { XMarkIcon } from '@heroicons/react/24/outline'
 import { Fragment, useEffect } from 'react'
 import { DetailedProduct, Product } from 'types'
 import Dropdown from './dropdown'
@@ -7,7 +7,7 @@ import Link from 'next/link'
 import { useAppSelector } from './Redux/hooks'
 import { appendQty, removeFromCart } from './Redux/Slices/cartSlice'
 import { useDispatch } from 'react-redux'
-import { subtotal, updateQty } from './Data/functions'
+import { subtotal, updateItemQty } from './Data/functions'
 import { classNames } from 'lib'
 
 type props = {
@@ -61,7 +61,7 @@ export default function ShoppingCartDrawer({ open, setOpen }: props) {
                             onClick={() => setOpen(false)}
                           >
                             <span className="sr-only">Close panel</span>
-                            <XIcon className="h-6 w-6" aria-hidden="true" />
+                            <XMarkIcon className="h-6 w-6" aria-hidden="true" />
                           </button>
                         </div>
                       </div>
@@ -72,8 +72,8 @@ export default function ShoppingCartDrawer({ open, setOpen }: props) {
                             role="list"
                             className="-my-6 divide-y divide-gray-200"
                           >
-                            {cart.map((product: DetailedProduct) => (
-                              <li key={product.id} className="flex py-6">
+                            {cart.map((product: DetailedProduct, idx) => (
+                              <li key={idx} className="flex py-6">
                                 <div className="h-24 w-24 flex-shrink-0 overflow-hidden rounded-md border border-gray-200">
                                   <img
                                     src={product.imageSrc}
@@ -114,7 +114,7 @@ export default function ShoppingCartDrawer({ open, setOpen }: props) {
                                     <p className="text-gray-500">
                                       <Dropdown
                                         onChange={(value) => {
-                                          updateQty(product.id, +value, dispatch)
+                                          updateItemQty(product.id, +value, dispatch)
                                           // dispatch(appendQty({id:product.id, qty:+value}))
                                         }}
                                         values={Array.from(

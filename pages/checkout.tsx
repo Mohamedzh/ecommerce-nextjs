@@ -1,7 +1,7 @@
 import { RadioGroup } from '@headlessui/react'
-import { CheckCircleIcon, TrashIcon } from '@heroicons/react/solid'
+import { CheckCircleIcon, TrashIcon } from '@heroicons/react/24/solid'
 import { deliveryMethods, paymentMethods } from 'components/Data/data'
-import { saveOrder, sendOrderEmail, subtotal, updateQty } from 'components/Data/functions'
+import { saveOrder, sendOrderEmail, subtotal, updateItemQty } from 'components/Data/functions'
 import Dropdown from 'components/dropdown'
 import Layout from 'components/layout'
 import { useAppSelector } from 'components/Redux/hooks'
@@ -12,12 +12,13 @@ import { useFormik } from 'formik'
 import * as Yup from 'yup'
 import { v4 as uuidv4 } from 'uuid';
 import { emptyCart, removeFromCart } from 'components/Redux/Slices/cartSlice'
-import { CartItem } from 'types'
+import { DetailedProduct } from 'types'
 
 
 
 export default function Example() {
   const dispatch = useDispatch()
+  const currentQty = useAppSelector(state => state.qty)
   const cart = useAppSelector(state => state.cart)
   let tax = 5.52
   const [open, setOpen] = useState(false)
@@ -25,7 +26,7 @@ export default function Example() {
     deliveryMethods[0]
   )
   const [selectedPaymentMethod, setPaymentMethod] = useState<string>(paymentMethods[0].title)
-  const [currentCart, setCurrentCart] = useState<CartItem[]>([])
+  const [currentCart, setCurrentCart] = useState<DetailedProduct[]>([])
 
   useEffect(() => { setCurrentCart(cart) }, [cart])
 
@@ -615,11 +616,11 @@ export default function Example() {
                               </label>
                               <Dropdown
                                 onChange={(value) => {
-                                  updateQty(product.id, +value, dispatch)
+                                  updateItemQty(product.id, +value, dispatch)
                                   console.log('hello world' + value)
                                 }}
                                 values={Array.from(
-                                  Array(Number(product.availableQty)),
+                                  Array(Number(currentQty)),
                                   (_, i) => i + 1
                                 )}
                                 Qty={product.quantity}

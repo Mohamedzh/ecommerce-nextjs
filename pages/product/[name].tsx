@@ -1,4 +1,4 @@
-import { StarIcon } from '@heroicons/react/solid'
+import { StarIcon } from '@heroicons/react/24/solid'
 import Layout from 'components/layout'
 import { classNames } from 'lib'
 import { useEffect, useState } from 'react'
@@ -22,7 +22,8 @@ export default function ProductPage({ product }: Props) {
 
   const [selectedQuantity, setSelectedQuantity] = useState<string>('0')
 
-  let currentTheme = product.quantities.find(theme => theme.color === selectedColor.name && theme.size === selectedSize.name)
+  let currentTheme = product.quantities.find(theme => theme.color === selectedColor.name 
+    && theme.size === selectedSize.name)
 
   useEffect(() => {
     if (currentTheme) {
@@ -323,13 +324,16 @@ export async function getStaticPaths() {
 }
 
 export async function getStaticProps({ params }: { params: { name: string } }) {
-
-  const res = await axios.get(`http://localhost:3000/api/items/${params.name}`)
-  const data: any = res.data
-  return {
-    props: {
-      product: data.currentProduct,
+  try {
+    const res = await axios.get(`http://localhost:3000/api/items/${params.name}`)
+    const data: any = res.data
+    return {
+      props: {
+        product: data.currentProduct,
+      }
     }
+  } catch (error) {
+    console.log(error)
   }
 }
 

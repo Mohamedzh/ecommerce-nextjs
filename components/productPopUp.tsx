@@ -2,34 +2,50 @@
 import { Dispatch, Fragment, SetStateAction, useEffect, useState } from 'react'
 import { Dialog, RadioGroup, Transition } from '@headlessui/react'
 import { XMarkIcon } from '@heroicons/react/24/outline'
-import { StarIcon } from '@heroicons/react/solid'
+import { StarIcon } from '@heroicons/react/24/solid'
 // import {GrClose} from 'react/icons.gr/lib'
 import Link from 'next/link'
 import { useDispatch } from 'react-redux'
-import { getProductDetails } from './Data/functions'
+import { updateItemQty, classNames } from './Data/functions'
 import { useAppSelector } from './Redux/hooks'
 import { addToCart } from './Redux/Slices/cartSlice'
+import { updateQty } from './Redux/Slices/qtySlice'
+import { Color, DetailedProduct, Quantity, Size } from 'types'
+import axios from 'axios'
+import { useRouter } from 'next/router'
 
-export function classNames(...classes: string[]) {
-    return classes.filter(Boolean).join(' ')
-}
 type Props = {
     setOpen: Dispatch<SetStateAction<boolean>>
     open: boolean
+    // product: DetailedProduct
 }
 
 export default function PopUp({ open, setOpen }: Props) {
+    const router = useRouter()
     const products = useAppSelector(state => state.item)
     const id = useAppSelector(state => state.currentItem.id)
     console.log(id)
-    const product = products?.find(product => product.id === id)
+    const product = products.find(product => product.id === id)
+    console.log(product)
 
     const dispatch = useDispatch()
-    const [selectedColor, setSelectedColor] = useState(product?.colors[0])
-    const [selectedSize, setSelectedSize] = useState(product?.sizes[2])
+    const [selectedColor, setSelectedColor] = useState<Color>(product!.colors[0])
+    const [selectedSize, setSelectedSize] = useState<Size>(product!.sizes[0])
     const [selectedQuantity, setSelectedQuantity] = useState<string>('0')
+    const [currentTheme, setCurrentTheme] = useState(product!.quantities[0])
 
+    // let currentTheme = product!.quantities.find(theme => theme.color === selectedColor.name
+    //     && theme.size === selectedSize.name)
 
+    useEffect(() => {
+        let current = product!.quantities.find(theme => theme.color === selectedColor.name
+            && theme.size === selectedSize.name)
+        setCurrentTheme(current!)
+        if (currentTheme) {
+            setSelectedQuantity(currentTheme.qty)
+            dispatch(updateQty(currentTheme.qty))
+        }
+    }, [selectedSize, selectedColor])
     // if (!product) {
     //     alert('loading...')
     // }
@@ -95,7 +111,7 @@ export default function PopUp({ open, setOpen }: Props) {
                                                     <h4 className="sr-only">Reviews</h4>
                                                     <div className="flex items-center">
                                                         <p className="text-sm text-gray-700">
-                                                            {/* {product.rating} */}
+                                                            {product!.rating}
                                                             <span className="sr-only"> out of 5 stars</span>
                                                         </p>
                                                         <div className="ml-1 flex items-center">
@@ -205,19 +221,20 @@ export default function PopUp({ open, setOpen }: Props) {
                                                     <button
                                                         type="button"
                                                         className="mt-8 flex w-full items-center justify-center rounded-md border border-transparent bg-indigo-600 py-3 px-8 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-                                                    // onClick={() => { dispatch(addToCart({ product, color: selectedColor.name, size: selectedSize.name, availableQty: selectedQuantity })) }}
+                                                        onClick={() => { dispatch(addToCart({ product: product!, color: selectedColor!.name, size: selectedSize!.name, availableQty: selectedQuantity })) }}
                                                     >
                                                         Add to bag
                                                     </button>
 
-                                                    <p className="absolute top-4 left-4 text-center sm:static sm:mt-8">
-                                                        {(product ?
-                                                            <Link href={product.href}>
-                                                                <a className="font-medium text-indigo-600 hover:text-indigo-500">
-                                                                    View full details
-                                                                </a>
-                                                            </Link> : 'loading...'
-                                                        )}
+                                                    <p onClick={() => router.push(product!.href)}
+                                                        className="absolute top-4 left-4 text-center sm:static sm:mt-8 font-medium text-indigo-600 hover:text-indigo-500 cursor-pointer">
+                                                        {/* <Link href={product!.href}> */}
+                                                        View full details
+
+                                                        {/* <a className="font-medium text-indigo-600 hover:text-indigo-500">
+                                                            View full details
+                                                        </a> */}
+                                                        {/* </Link> */}
 
                                                     </p>
                                                 </form>

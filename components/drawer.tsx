@@ -1,5 +1,5 @@
 import { Dialog, Tab, Transition } from '@headlessui/react'
-import { XIcon } from '@heroicons/react/outline'
+import { XMarkIcon } from '@heroicons/react/24/outline'
 import { classNames } from 'lib'
 import { Fragment } from 'react'
 import {navigation} from './Data/data'
@@ -42,7 +42,7 @@ function Drawer({ open, setOpen }: props) {
                   onClick={() => setOpen(false)}
                 >
                   <span className="sr-only">Close menu</span>
-                  <XIcon className="h-6 w-6" aria-hidden="true" />
+                  <XMarkIcon className="h-6 w-6" aria-hidden="true" />
                 </button>
               </div>
 

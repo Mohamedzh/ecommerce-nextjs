@@ -2,7 +2,7 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { DetailedProduct, Product } from "types";
 
 const initialState: Product = {
-    id: '',
+    id: '1',
     name: '',
     href: '',
     color: '',
@@ -11,7 +11,8 @@ const initialState: Product = {
     imageSrc: '',
     imageAlt: '',
     description: '',
-    details: ''
+    details: '',
+    rating: ''
 };
 
 export const currentItemSlice = createSlice({

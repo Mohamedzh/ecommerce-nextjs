@@ -1,4 +1,4 @@
-import { Fragment, useState } from 'react'
+import { Fragment, useEffect, useState } from 'react'
 import { Dialog, Disclosure, Menu, Popover, Tab, Transition } from '@headlessui/react'
 import { Bars3Icon, MagnifyingGlassIcon, ShoppingBagIcon, UserIcon, XMarkIcon } from '@heroicons/react/24/outline'
 import { ChevronDownIcon, FunnelIcon, StarIcon } from '@heroicons/react/20/solid'
@@ -6,10 +6,13 @@ import { NextPage } from 'next'
 import Link from 'next/link'
 import Layout from 'components/layout'
 import { classNames } from 'components/Data/functions'
-import { footerNavigation, filters } from 'components/Data/data'
-import { array } from 'yup'
+import { footerNavigation } from 'components/Data/data'
 import axios from 'axios'
 import { DetailedProduct } from 'types'
+import { categoryFilter, clearFilter, colorFilter, priceFilter, sizeFilter } from 'components/Redux/Slices/filterSlice'
+import { useDispatch } from 'react-redux'
+import { useAppSelector } from 'components/Redux/hooks'
+import { addCurrentProducts, changeCurrent } from 'components/Redux/Slices/sortSlice'
 
 const navigation = {
     categories: [
@@ -197,399 +200,91 @@ const navigation = {
     ],
 }
 
-const sortOptions = [
-    { name: 'Most Popular', href: '#', current: true },
-    { name: 'Best Rating', href: '#', current: false },
-    { name: 'Newest', href: '#', current: false },
-    { name: 'Price: Low to High', href: '#', current: false },
-    { name: 'Price: High to Low', href: '#', current: false },
-]
-const products2 = [
-    {
-        id: 1,
-        name: 'Organize Basic Set (Walnut)',
-        price: '$149',
-        rating: 5,
-        reviewCount: 38,
-        imageSrc: 'https://tailwindui.com/img/ecommerce-images/category-page-05-image-card-01.jpg',
-        imageAlt: 'TODO',
-        href: '#',
-    },
-    {
-        id: 2,
-        name: 'Organize Pen Holder',
-        price: '$15',
-        rating: 5,
-        reviewCount: 18,
-        imageSrc: 'https://tailwindui.com/img/ecommerce-images/category-page-05-image-card-02.jpg',
-        imageAlt: 'TODO',
-        href: '#',
-    },
-    {
-        id: 3,
-        name: 'Organize Sticky Note Holder',
-        price: '$15',
-        rating: 5,
-        reviewCount: 14,
-        imageSrc: 'https://tailwindui.com/img/ecommerce-images/category-page-05-image-card-03.jpg',
-        imageAlt: 'TODO',
-        href: '#',
-    },
-    {
-        id: 4,
-        name: 'Organize Phone Holder',
-        price: '$15',
-        rating: 4,
-        reviewCount: 21,
-        imageSrc: 'https://tailwindui.com/img/ecommerce-images/category-page-05-image-card-04.jpg',
-        imageAlt: 'TODO',
-        href: '#',
-    },
-    // More products...
-]
+const Collection: NextPage = ({ products }: { products?: DetailedProduct[] }) => {
+    const dispatch = useDispatch()
+    const filters = useAppSelector(state => state.filter)
+    const sortOptions = useAppSelector(state => state.sort.sortOptions)
+    const currentSort = useAppSelector(state => state.sort.currentProducts)
 
-const Collection: NextPage = ({products}:{products?:DetailedProduct[]}) => {
+    const [sumFilters, setSumFilters] = useState<number>(0)
+    // const [showProducts, setShowProducts] = useState<DetailedProduct[]>(products!)
+
+    useEffect(() => {
+        setSumFilters(filters.color.filter(color => color.checked === true).length +
+            filters.size.filter(size => size.checked === true).length +
+            filters.category.filter(category => category.checked === true).length +
+            filters.price.filter(price => price.checked === true).length
+        );
+        // setShowProducts(filter(products!))
+        dispatch(addCurrentProducts(filter(products!)))
+    }, [filters])
+
+    const filter = (products: DetailedProduct[]) => {
+        let filteredColors = filters.color.filter(color => color.checked === true).map(color => color.value)
+        let filteredSizes = filters.size.filter(size => size.checked === true).map(size => size.value)
+        let filteredCategories = filters.category.filter(category => category.checked === true).map(category => category.value)
+        let filteredPrices = filters.price.filter(price => price.checked === true).map(price => Number(price.value))
+
+        let filteredProducts: DetailedProduct[] = products
+        let result: DetailedProduct[] = []
+
+        for (let i = 0; i < filteredColors.length; i++) {
+            if (filteredColors.length === 0) {
+                break
+            }
+            let filteredProductColors = filteredProducts.filter(product => product.colors.map(color => color.name.toLowerCase()).includes(filteredColors[i]))
+            result.push(...filteredProductColors)
+            if (i === filteredColors.length - 1) {
+                filteredProducts = result
+                result = []
+            }
+        }
+        for (let i = 0; i < filteredSizes.length; i++) {
+            if (filteredSizes.length === 0) {
+                break
+            }
+            let filteredProductSizes = filteredProducts.filter(product => product.sizes.map(color => color.name.toLowerCase()).includes(filteredSizes[i]))
+            result.push(...filteredProductSizes)
+            if (i === filteredSizes.length - 1) {
+                filteredProducts = result
+                result = []
+            }
+        }
+        for (let i = 0; i < filteredCategories.length; i++) {
+            if (filteredCategories.length === 0) {
+                break
+            }
+            let filteredProductCategories = filteredProducts.filter(product => product.category.toLowerCase() === filteredCategories[i] || product.new.toLowerCase() === filteredCategories[i])
+            result.push(...filteredProductCategories)
+            if (i === filteredCategories.length - 1) {
+                filteredProducts = result
+                result = []
+            }
+        }
+
+        for (let i = 0; i < filteredPrices.length; i++) {
+            if (filteredPrices.length === 0) {
+                break
+            }
+            let filteredProductPrices = filteredProducts.filter(product => Number(product.price) >= filteredPrices[i] && Number(product.price) <= filteredPrices[i] + 25)
+            result.push(...filteredProductPrices)
+            if (filteredPrices[i] === 75) {
+                result.push(...filteredProducts.filter(product => Number(product.price) > 100))
+            }
+            if (i === filteredPrices.length - 1) {
+                filteredProducts = result
+                result = []
+            }
+        }
+        let filteredProductsSet = Array.from(new Set(filteredProducts))
+        return filteredProductsSet
+    }
+
     const [open, setOpen] = useState(false)
-    let count = 0
-    let arr = Object.keys(filters)
-    console.log(products)
-    // Object.keys(filters).forEach(function(key) {
-    //  console.log(filters[key])
-    // });
-    // const count = filters[1].filter(item=>item.checked===true).length
-    // console.log(count)
+
     return (
         <Layout>
             <div className="bg-white">
-                {/* Mobile menu */}
-                {/* <Transition.Root show={open} as={Fragment}>
-                    <Dialog as="div" className="relative z-40 lg:hidden" onClose={setOpen}>
-                        <Transition.Child
-                            as={Fragment}
-                            enter="transition-opacity ease-linear duration-300"
-                            enterFrom="opacity-0"
-                            enterTo="opacity-100"
-                            leave="transition-opacity ease-linear duration-300"
-                            leaveFrom="opacity-100"
-                            leaveTo="opacity-0"
-                        >
-                            <div className="fixed inset-0 bg-black bg-opacity-25" />
-                        </Transition.Child>
-
-                        <div className="fixed inset-0 z-40 flex">
-                            <Transition.Child
-                                as={Fragment}
-                                enter="transition ease-in-out duration-300 transform"
-                                enterFrom="-translate-x-full"
-                                enterTo="translate-x-0"
-                                leave="transition ease-in-out duration-300 transform"
-                                leaveFrom="translate-x-0"
-                                leaveTo="-translate-x-full"
-                            >
-                                <Dialog.Panel className="relative flex w-full max-w-xs flex-col overflow-y-auto bg-white pb-12 shadow-xl">
-                                    <div className="flex px-4 pt-5 pb-2">
-                                        <button
-                                            type="button"
-                                            className="-m-2 inline-flex items-center justify-center rounded-md p-2 text-gray-400"
-                                            onClick={() => setOpen(false)}
-                                        >
-                                            <span className="sr-only">Close menu</span>
-                                            <XMarkIcon className="h-6 w-6" aria-hidden="true" />
-                                        </button>
-                                    </div>
-
-                                     Links 
-                                    <Tab.Group as="div" className="mt-2">
-                                        <div className="border-b border-gray-200">
-                                            <Tab.List className="-mb-px flex space-x-8 px-4">
-                                                {navigation.categories.map((category) => (
-                                                    <Tab
-                                                        key={category.name}
-                                                        className={({ selected }) =>
-                                                            classNames(
-                                                                selected ? 'text-indigo-600 border-indigo-600' : 'text-gray-900 border-transparent',
-                                                                'flex-1 whitespace-nowrap border-b-2 py-4 px-1 text-base font-medium'
-                                                            )
-                                                        }
-                                                    >
-                                                        {category.name}
-                                                    </Tab>
-                                                ))}
-                                            </Tab.List>
-                                        </div>
-                                        <Tab.Panels as={Fragment}>
-                                            {navigation.categories.map((category) => (
-                                                <Tab.Panel key={category.name} className="space-y-10 px-4 pt-10 pb-8">
-                                                    <div className="space-y-4">
-                                                        {category.featured.map((item, itemIdx) => (
-                                                            <div
-                                                                key={itemIdx}
-                                                                className="group aspect-w-1 aspect-h-1 relative overflow-hidden rounded-md bg-gray-100"
-                                                            >
-                                                                <img
-                                                                    src={item.imageSrc}
-                                                                    alt={item.imageAlt}
-                                                                    className="object-cover object-center group-hover:opacity-75"
-                                                                />
-                                                                <div className="flex flex-col justify-end">
-                                                                    <div className="bg-white bg-opacity-60 p-4 text-base sm:text-sm">
-                                                                        <a href={item.href} className="font-medium text-gray-900">
-                                                                            <span className="absolute inset-0" aria-hidden="true" />
-                                                                            {item.name}
-                                                                        </a>
-                                                                        <p aria-hidden="true" className="mt-0.5 text-gray-700 sm:mt-1">
-                                                                            Shop now
-                                                                        </p>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        ))}
-                                                    </div>
-                                                    {category.sections.map((column, columnIdx) => (
-                                                        <div key={columnIdx} className="space-y-10">
-                                                            {column.map((section) => (
-                                                                <div key={section.name}>
-                                                                    <p
-                                                                        id={`${category.id}-${section.id}-heading-mobile`}
-                                                                        className="font-medium text-gray-900"
-                                                                    >
-                                                                        {section.name}
-                                                                    </p>
-                                                                    <ul
-                                                                        role="list"
-                                                                        aria-labelledby={`${category.id}-${section.id}-heading-mobile`}
-                                                                        className="mt-6 flex flex-col space-y-6"
-                                                                    >
-                                                                        {section.items.map((item) => (
-                                                                            <li key={item.name} className="flow-root">
-                                                                                <a href={item.href} className="-m-2 block p-2 text-gray-500">
-                                                                                    {item.name}
-                                                                                </a>
-                                                                            </li>
-                                                                        ))}
-                                                                    </ul>
-                                                                </div>
-                                                            ))}
-                                                        </div>
-                                                    ))}
-                                                </Tab.Panel>
-                                            ))}
-                                        </Tab.Panels>
-                                    </Tab.Group>
-
-                                    <div className="space-y-6 border-t border-gray-200 py-6 px-4">
-                                        {navigation.pages.map((page) => (
-                                            <div key={page.name} className="flow-root">
-                                                <a href={page.href} className="-m-2 block p-2 font-medium text-gray-900">
-                                                    {page.name}
-                                                </a>
-                                            </div>
-                                        ))}
-                                    </div>
-
-                                    <div className="border-t border-gray-200 py-6 px-4">
-                                        <a href="#" className="-m-2 flex items-center p-2">
-                                            <img
-                                                src="https://tailwindui.com/img/flags/flag-canada.svg"
-                                                alt=""
-                                                className="block h-auto w-5 flex-shrink-0"
-                                            />
-                                            <span className="ml-3 block text-base font-medium text-gray-900">CAD</span>
-                                            <span className="sr-only">, change currency</span>
-                                        </a>
-                                    </div>
-                                </Dialog.Panel>
-                            </Transition.Child>
-                        </div>
-                    </Dialog>
-                </Transition.Root> */}
-
-                {/*<header className="relative bg-white">
-                    <nav aria-label="Top" className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                        <div className="border-b border-gray-200">
-                            <div className="flex h-16 items-center justify-between">
-                                <div className="flex flex-1 items-center lg:hidden">
-                                    <button
-                                        type="button"
-                                        className="-ml-2 rounded-md bg-white p-2 text-gray-400"
-                                        onClick={() => setOpen(true)}
-                                    >
-                                        <span className="sr-only">Open menu</span>
-                                        <Bars3Icon className="h-6 w-6" aria-hidden="true" />
-                                    </button>
-
-                                    <a href="#" className="ml-2 p-2 text-gray-400 hover:text-gray-500">
-                                        <span className="sr-only">Search</span>
-                                        <MagnifyingGlassIcon className="h-6 w-6" aria-hidden="true" />
-                                    </a>
-                                </div>
-
-                                <Popover.Group className="hidden lg:block lg:flex-1 lg:self-stretch">
-                                    <div className="flex h-full space-x-8">
-                                        {navigation.categories.map((category) => (
-                                            <Popover key={category.name} className="flex">
-                                                {({ open }) => (
-                                                    <>
-                                                        <div className="relative flex">
-                                                            <Popover.Button
-                                                                className={classNames(
-                                                                    open ? 'text-indigo-600' : 'text-gray-700 hover:text-gray-800',
-                                                                    'relative z-10 flex items-center justify-center text-sm font-medium transition-colors duration-200 ease-out'
-                                                                )}
-                                                            >
-                                                                {category.name}
-                                                                <span
-                                                                    className={classNames(
-                                                                        open ? 'bg-indigo-600' : '',
-                                                                        'absolute inset-x-0 bottom-0 h-0.5 transition-colors duration-200 ease-out sm:mt-5 sm:translate-y-px sm:transform'
-                                                                    )}
-                                                                    aria-hidden="true"
-                                                                />
-                                                            </Popover.Button>
-                                                        </div>
-
-                                                        <Transition
-                                                            as={Fragment}
-                                                            enter="transition ease-out duration-200"
-                                                            enterFrom="opacity-0"
-                                                            enterTo="opacity-100"
-                                                            leave="transition ease-in duration-150"
-                                                            leaveFrom="opacity-100"
-                                                            leaveTo="opacity-0"
-                                                        >
-                                                            <Popover.Panel className="absolute inset-x-0 top-full z-20">
-                                                                <div className="absolute inset-0 top-1/2 bg-white shadow" aria-hidden="true" />
-
-                                                                <div className="relative bg-white">
-                                                                    <div className="mx-auto max-w-7xl px-8">
-                                                                        <div className="grid grid-cols-2 gap-y-10 gap-x-8 py-16">
-                                                                            <div className="grid grid-cols-2 grid-rows-1 gap-8 text-sm">
-                                                                                {category.featured.map((item, itemIdx) => (
-                                                                                    <div
-                                                                                        key={item.name}
-                                                                                        className={classNames(
-                                                                                            itemIdx === 0 ? 'col-span-2 aspect-w-2' : '',
-                                                                                            'group relative aspect-w-1 aspect-h-1 rounded-md bg-gray-100 overflow-hidden'
-                                                                                        )}
-                                                                                    >
-                                                                                        <img
-                                                                                            src={item.imageSrc}
-                                                                                            alt={item.imageAlt}
-                                                                                            className="object-cover object-center group-hover:opacity-75"
-                                                                                        />
-                                                                                        <div className="flex flex-col justify-end">
-                                                                                            <div className="bg-white bg-opacity-60 p-4 text-sm">
-                                                                                                <a href={item.href} className="font-medium text-gray-900">
-                                                                                                    <span className="absolute inset-0" aria-hidden="true" />
-                                                                                                    {item.name}
-                                                                                                </a>
-                                                                                                <p aria-hidden="true" className="mt-0.5 text-gray-700 sm:mt-1">
-                                                                                                    Shop now
-                                                                                                </p>
-                                                                                            </div>
-                                                                                        </div>
-                                                                                    </div>
-                                                                                ))}
-                                                                            </div>
-                                                                            <div className="grid grid-cols-3 gap-y-10 gap-x-8 text-sm text-gray-500">
-                                                                                {category.sections.map((column, columnIdx) => (
-                                                                                    <div key={columnIdx} className="space-y-10">
-                                                                                        {column.map((section) => (
-                                                                                            <div key={section.name}>
-                                                                                                <p
-                                                                                                    id={`${category.id}-${section.id}-heading`}
-                                                                                                    className="font-medium text-gray-900"
-                                                                                                >
-                                                                                                    {section.name}
-                                                                                                </p>
-                                                                                                <ul
-                                                                                                    role="list"
-                                                                                                    aria-labelledby={`${category.id}-${section.id}-heading`}
-                                                                                                    className="mt-4 space-y-4"
-                                                                                                >
-                                                                                                    {section.items.map((item) => (
-                                                                                                        <li key={item.name} className="flex">
-                                                                                                            <a href={item.href} className="hover:text-gray-800">
-                                                                                                                {item.name}
-                                                                                                            </a>
-                                                                                                        </li>
-                                                                                                    ))}
-                                                                                                </ul>
-                                                                                            </div>
-                                                                                        ))}
-                                                                                    </div>
-                                                                                ))}
-                                                                            </div>
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-                                                            </Popover.Panel>
-                                                        </Transition>
-                                                    </>
-                                                )}
-                                            </Popover>
-                                        ))}
-
-                                        {navigation.pages.map((page) => (
-                                            <a
-                                                key={page.name}
-                                                href={page.href}
-                                                className="flex items-center text-sm font-medium text-gray-700 hover:text-gray-800"
-                                            >
-                                                {page.name}
-                                            </a>
-                                        ))}
-                                    </div>
-                                </Popover.Group>
-
-                                <Link href='/'>
-                                    <a className="flex">
-                                        <span className="sr-only">Your Company</span>
-                                        <img
-                                            className="h-8 w-auto"
-                                            src="https://tailwindui.com/img/logos/mark.svg?color=indigo&shade=600"
-                                            alt=""
-                                        />
-                                    </a>
-                                </Link>
-
-                                <div className="flex flex-1 items-center justify-end">
-                                    <a href="#" className="hidden text-gray-700 hover:text-gray-800 lg:flex lg:items-center">
-                                    <img
-                                        src="https://tailwindui.com/img/flags/flag-canada.svg"
-                                        alt=""
-                                        className="block h-auto w-5 flex-shrink-0"
-                                    />
-                                    <span className="ml-3 block text-sm font-medium">CAD</span>
-                                    <span className="sr-only">, change currency</span>
-                                </a> 
-
-                                    <a href="#" className="ml-6 hidden p-2 text-gray-400 hover:text-gray-500 lg:block">
-                                        <span className="sr-only">Search</span>
-                                        <MagnifyingGlassIcon className="h-6 w-6" aria-hidden="true" />
-                                    </a>
-
-                                     <a href="#" className="p-2 text-gray-400 hover:text-gray-500 lg:ml-4">
-                                    <span className="sr-only">Account</span>
-                                    <UserIcon className="h-6 w-6" aria-hidden="true" />
-                                </a> 
-
-                                    <div className="ml-4 flow-root lg:ml-6">
-                                        <a href="#" className="group -m-2 flex items-center p-2">
-                                            <ShoppingBagIcon
-                                                className="h-6 w-6 flex-shrink-0 text-gray-400 group-hover:text-gray-500"
-                                                aria-hidden="true"
-                                            />
-                                            <span className="ml-2 text-sm font-medium text-gray-700 group-hover:text-gray-800">0</span>
-                                            <span className="sr-only">items in cart, view bag</span>
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </nav>
-                            </header>*/}
-
                 <main className="pb-24">
                     {/* <div className="py-16 px-4 text-center sm:px-6 lg:px-8">
                         <h1 className="text-4xl font-bold tracking-tight text-gray-900">Workspace</h1>
@@ -615,11 +310,16 @@ const Collection: NextPage = ({products}:{products?:DetailedProduct[]}) => {
                                             className="mr-2 h-5 w-5 flex-none text-gray-400 group-hover:text-gray-500"
                                             aria-hidden="true"
                                         />
-                                        2 Filters
+                                        {sumFilters} Filters
                                     </Disclosure.Button>
                                 </div>
                                 <div className="pl-6">
-                                    <button type="button" className="text-gray-500">
+                                    <button
+                                        type="button"
+                                        onClick={() =>
+                                            dispatch(clearFilter())
+                                        }
+                                        className="text-gray-500">
                                         Clear all
                                     </button>
                                 </div>
@@ -639,7 +339,8 @@ const Collection: NextPage = ({products}:{products?:DetailedProduct[]}) => {
                                                         defaultValue={option.value}
                                                         type="checkbox"
                                                         className="h-4 w-4 flex-shrink-0 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-                                                        defaultChecked={option.checked}
+                                                        checked={option.checked}
+                                                        onChange={() => dispatch(priceFilter(option))}
                                                     />
                                                     <label htmlFor={`price-${optionIdx}`} className="ml-3 min-w-0 flex-1 text-gray-600">
                                                         {option.label}
@@ -659,7 +360,8 @@ const Collection: NextPage = ({products}:{products?:DetailedProduct[]}) => {
                                                         defaultValue={option.value}
                                                         type="checkbox"
                                                         className="h-4 w-4 flex-shrink-0 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-                                                        defaultChecked={option.checked}
+                                                        checked={option.checked}
+                                                        onChange={() => dispatch(colorFilter(option))}
                                                     />
                                                     <label htmlFor={`color-${optionIdx}`} className="ml-3 min-w-0 flex-1 text-gray-600">
                                                         {option.label}
@@ -681,7 +383,8 @@ const Collection: NextPage = ({products}:{products?:DetailedProduct[]}) => {
                                                         defaultValue={option.value}
                                                         type="checkbox"
                                                         className="h-4 w-4 flex-shrink-0 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-                                                        defaultChecked={option.checked}
+                                                        checked={option.checked}
+                                                        onChange={() => dispatch(sizeFilter(option))}
                                                     />
                                                     <label htmlFor={`size-${optionIdx}`} className="ml-3 min-w-0 flex-1 text-gray-600">
                                                         {option.label}
@@ -701,7 +404,8 @@ const Collection: NextPage = ({products}:{products?:DetailedProduct[]}) => {
                                                         defaultValue={option.value}
                                                         type="checkbox"
                                                         className="h-4 w-4 flex-shrink-0 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-                                                        defaultChecked={option.checked}
+                                                        checked={option.checked}
+                                                        onChange={() => dispatch(categoryFilter(option))}
                                                     />
                                                     <label htmlFor={`category-${optionIdx}`} className="ml-3 min-w-0 flex-1 text-gray-600">
                                                         {option.label}
@@ -741,7 +445,8 @@ const Collection: NextPage = ({products}:{products?:DetailedProduct[]}) => {
                                                     <Menu.Item key={option.name}>
                                                         {({ active }) => (
                                                             <a
-                                                                href={option.href}
+                                                                href='#'
+                                                                onClick={() => { dispatch(changeCurrent(option)) }}
                                                                 className={classNames(
                                                                     option.current ? 'font-medium text-gray-900' : 'text-gray-500',
                                                                     active ? 'bg-gray-100' : '',
@@ -768,7 +473,7 @@ const Collection: NextPage = ({products}:{products?:DetailedProduct[]}) => {
                         </h2>
 
                         <div className="-mx-px grid grid-cols-2 border-l border-gray-200 sm:mx-0 md:grid-cols-3 lg:grid-cols-4">
-                            {products?.map((product) => (
+                            {currentSort.map((product) => (
                                 <div key={product.id} className="group relative border-r border-b border-gray-200 p-4 sm:p-6">
                                     <div className="aspect-w-1 aspect-h-1 overflow-hidden rounded-lg bg-gray-200 group-hover:opacity-75">
                                         <img
@@ -779,10 +484,12 @@ const Collection: NextPage = ({products}:{products?:DetailedProduct[]}) => {
                                     </div>
                                     <div className="pt-10 pb-4 text-center">
                                         <h3 className="text-sm font-medium text-gray-900">
-                                            <a href={product.href}>
-                                                <span aria-hidden="true" className="absolute inset-0" />
-                                                {product.name}
-                                            </a>
+                                            <Link href={product.href}>
+                                                <a>
+                                                    <span aria-hidden="true" className="absolute inset-0" />
+                                                    {product.name}
+                                                </a>
+                                            </Link>
                                         </h3>
                                         <div className="mt-3 flex flex-col items-center">
                                             <p className="sr-only">{product.rating} out of 5 stars</p>
@@ -808,21 +515,20 @@ const Collection: NextPage = ({products}:{products?:DetailedProduct[]}) => {
                     </section>
 
                     {/* Pagination */}
-                    <nav
+                    {/* <nav
                         aria-label="Pagination"
                         className="mx-auto mt-6 flex max-w-7xl justify-between px-4 text-sm font-medium text-gray-700 sm:px-6 lg:px-8"
                     >
                         <div className="min-w-0 flex-1">
                             <a
-                                href="#"
+                                href="#page1"
                                 className="inline-flex h-10 items-center rounded-md border border-gray-300 bg-white px-4 hover:bg-gray-100 focus:border-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-opacity-25 focus:ring-offset-1 focus:ring-offset-indigo-600"
                             >
                                 Previous
                             </a>
                         </div>
                         <div className="hidden space-x-2 sm:flex">
-                            {/* Current: "border-indigo-600 ring-1 ring-indigo-600", Default: "border-gray-300" */}
-                            <a
+                            <a id="page1"
                                 href="#"
                                 className="inline-flex h-10 items-center rounded-md border border-gray-300 bg-white px-4 hover:bg-gray-100 focus:border-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-opacity-25 focus:ring-offset-1 focus:ring-offset-indigo-600"
                             >
@@ -868,78 +574,8 @@ const Collection: NextPage = ({products}:{products?:DetailedProduct[]}) => {
                                 Next
                             </a>
                         </div>
-                    </nav>
+                    </nav> */}
                 </main>
-
-                {/* <footer aria-labelledby="footer-heading" className="bg-white">
-                    <h2 id="footer-heading" className="sr-only">
-                        Footer
-                    </h2>
-                    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                        <div className="grid grid-cols-2 gap-8 border-t border-gray-200 py-20 sm:grid-cols-2 sm:gap-y-0 lg:grid-cols-4">
-                            <div className="grid grid-cols-1 gap-y-10 lg:col-span-2 lg:grid-cols-2 lg:gap-y-0 lg:gap-x-8">
-                                <div>
-                                    <h3 className="text-sm font-medium text-gray-900">Account</h3>
-                                    <ul role="list" className="mt-6 space-y-6">
-                                        {footerNavigation.account.map((item) => (
-                                            <li key={item.name} className="text-sm">
-                                                <a href={item.href} className="text-gray-500 hover:text-gray-600">
-                                                    {item.name}
-                                                </a>
-                                            </li>
-                                        ))}
-                                    </ul>
-                                </div>
-                                <div>
-                                    <h3 className="text-sm font-medium text-gray-900">Service</h3>
-                                    <ul role="list" className="mt-6 space-y-6">
-                                        {footerNavigation.service.map((item) => (
-                                            <li key={item.name} className="text-sm">
-                                                <a href={item.href} className="text-gray-500 hover:text-gray-600">
-                                                    {item.name}
-                                                </a>
-                                            </li>
-                                        ))}
-                                    </ul>
-                                </div>
-                            </div>
-                            <div className="grid grid-cols-1 gap-y-10 lg:col-span-2 lg:grid-cols-2 lg:gap-y-0 lg:gap-x-8">
-                                <div>
-                                    <h3 className="text-sm font-medium text-gray-900">Company</h3>
-                                    <ul role="list" className="mt-6 space-y-6">
-                                        {footerNavigation.company.map((item) => (
-                                            <li key={item.name} className="text-sm">
-                                                <a href={item.href} className="text-gray-500 hover:text-gray-600">
-                                                    {item.name}
-                                                </a>
-                                            </li>
-                                        ))}
-                                    </ul>
-                                </div>
-                                <div>
-                                    <h3 className="text-sm font-medium text-gray-900">Connect</h3>
-                                    <ul role="list" className="mt-6 space-y-6">
-                                        {footerNavigation.connect.map((item) => (
-                                            <li key={item.name} className="text-sm">
-                                                <a href={item.href} className="text-gray-500 hover:text-gray-600">
-                                                    {item.name}
-                                                </a>
-                                            </li>
-                                        ))}
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="border-t border-gray-100 py-10 sm:flex sm:items-center sm:justify-between">
-                            <div className="flex items-center justify-center text-sm text-gray-500">
-                                <p>Shipping to Canada ($CAD)</p>
-                                <p className="ml-3 border-l border-gray-200 pl-3">English</p>
-                            </div>
-                            <p className="mt-6 text-center text-sm text-gray-500 sm:mt-0">&copy; 2021 Your Company, Inc.</p>
-                        </div>
-                    </div>
-                </footer> */}
             </div>
         </Layout>
     )
@@ -947,16 +583,16 @@ const Collection: NextPage = ({products}:{products?:DetailedProduct[]}) => {
 
 export default Collection
 
- export async function getStaticProps() {
-        try {
-            const res = await axios.get(`http://localhost:3000/api/items`)
-            const data = res.data
-            return {
-                props: {
-                    products: data
-                }
+export async function getStaticProps() {
+    try {
+        const res = await axios.get(`http://localhost:3000/api/items`)
+        const data = res.data
+        return {
+            props: {
+                products: data
             }
-        } catch (error) {
-            console.log(error)
         }
+    } catch (error) {
+        console.log(error)
     }
+}

@@ -219,24 +219,30 @@ export const filters = {
   color: [
       { value: 'white', label: 'White', checked: false },
       { value: 'beige', label: 'Beige', checked: false },
-      { value: 'blue', label: 'Blue', checked: true },
+      { value: 'blue', label: 'Blue', checked: false },
       { value: 'brown', label: 'Brown', checked: false },
       { value: 'green', label: 'Green', checked: false },
       { value: 'purple', label: 'Purple', checked: false },
   ],
   size: [
       { value: 'xs', label: 'XS', checked: false },
-      { value: 's', label: 'S', checked: true },
+      { value: 's', label: 'S', checked: false },
       { value: 'm', label: 'M', checked: false },
       { value: 'l', label: 'L', checked: false },
       { value: 'xl', label: 'XL', checked: false },
       { value: '2xl', label: '2XL', checked: false },
   ],
   category: [
-      { value: 'all-new-arrivals', label: 'All New Arrivals', checked: false },
-      { value: 'tees', label: 'Tees', checked: false },
-      { value: 'objects', label: 'Objects', checked: false },
-      { value: 'sweatshirts', label: 'Sweatshirts', checked: false },
-      { value: 'pants-and-shorts', label: 'Pants & Shorts', checked: false },
+      { value: 'women', label: 'Women', checked: false },
+      { value: 'men', label: 'Men', checked: false },
+      { value: 'desk', label: 'Desk Accessories', checked: false },
+      { value: 'true', label: 'All New Arrivals', checked: false },
   ],
 }
+
+export const sortOptions = [
+  { name: 'Most Popular', href: '#', current: false },
+  { name: 'Best Rating', href: '#', current: false },
+  { name: 'Price: Low to High', href: '#', current: false },
+  { name: 'Price: High to Low', href: '#', current: false },
+]

@@ -10,6 +10,9 @@ export interface Product {
   description: string
   details: string
   rating: string
+  trending: string
+  category: string
+  new: string
 }
 
 export interface DetailedProduct extends Product {
@@ -86,4 +89,16 @@ export interface Quantity {
   color: string
   size: string
   qty: string
+}
+
+export interface Filter {
+  value: string
+  label: string
+  checked: boolean
+}
+
+export interface SortOption {
+  name: string
+  href: string
+  current: boolean
 }

@@ -4,14 +4,17 @@ import cartSlice from './Slices/cartSlice'
 import itemSlice from './Slices/itemSlice'
 import currentItemSlice from './Slices/currentItemSlice'
 import qtySlice from './Slices/qtySlice'
-
+import filterSlice from './Slices/filterSlice'
+import sortSlice from "./Slices/sortSlice";
 
 export const store = configureStore({
   reducer: {
     cart: cartSlice,
     item: itemSlice,
     currentItem: currentItemSlice,
-    qty: qtySlice
+    qty: qtySlice,
+    filter: filterSlice,
+    sort: sortSlice
   }
 })
 

@@ -12,7 +12,10 @@ const initialState: Product = {
     imageAlt: '',
     description: '',
     details: '',
-    rating: ''
+    rating: '',
+    trending: '',
+    new: '',
+    category: ''
 };
 
 export const currentItemSlice = createSlice({

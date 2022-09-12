@@ -7,7 +7,7 @@ import Link from 'next/link'
 import { useAppSelector } from './Redux/hooks'
 import { appendQty, removeFromCart } from './Redux/Slices/cartSlice'
 import { useDispatch } from 'react-redux'
-import { subtotal, updateItemQty } from './Data/functions'
+import { subtotal, updateItemQty } from '../lib/functions'
 import { classNames } from 'lib'
 
 type props = {

@@ -3,15 +3,12 @@ import { Dispatch, Fragment, SetStateAction, useEffect, useState } from 'react'
 import { Dialog, RadioGroup, Transition } from '@headlessui/react'
 import { XMarkIcon } from '@heroicons/react/24/outline'
 import { StarIcon } from '@heroicons/react/24/solid'
-// import {GrClose} from 'react/icons.gr/lib'
-import Link from 'next/link'
 import { useDispatch } from 'react-redux'
-import { updateItemQty, classNames } from './Data/functions'
+import { updateItemQty, classNames } from '../lib/functions'
 import { useAppSelector } from './Redux/hooks'
 import { addToCart } from './Redux/Slices/cartSlice'
 import { updateQty } from './Redux/Slices/qtySlice'
 import { Color, DetailedProduct, Quantity, Size } from 'types'
-import axios from 'axios'
 import { useRouter } from 'next/router'
 
 type Props = {
@@ -24,9 +21,7 @@ export default function PopUp({ open, setOpen }: Props) {
     const router = useRouter()
     const products = useAppSelector(state => state.item)
     const id = useAppSelector(state => state.currentItem.id)
-    console.log(id)
     const product = products.find(product => product.id === id)
-    console.log(product)
 
     const dispatch = useDispatch()
     const [selectedColor, setSelectedColor] = useState<Color>(product!.colors[0])
@@ -86,10 +81,7 @@ export default function PopUp({ open, setOpen }: Props) {
                                         onClick={() => setOpen(false)}
                                     >
                                         <span className="sr-only">Close</span>
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
-                                            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                                        </svg>
-                                        {/* <XMarkIcon className="h-6 w-6" aria-hidden="true" /> */}
+                                        <XMarkIcon className="h-6 w-6" aria-hidden="true" />
                                     </button>
 
                                     <div className="grid w-full grid-cols-1 items-start gap-y-8 gap-x-6 sm:grid-cols-12 lg:items-center lg:gap-x-8">
@@ -106,7 +98,6 @@ export default function PopUp({ open, setOpen }: Props) {
 
                                                 <p className="font-medium text-gray-900">${product?.price}.00</p>
 
-                                                {/* Reviews */}
                                                 <div className="mt-4">
                                                     <h4 className="sr-only">Reviews</h4>
                                                     <div className="flex items-center">
@@ -144,7 +135,6 @@ export default function PopUp({ open, setOpen }: Props) {
                                                 </h3>
 
                                                 <form>
-                                                    {/* Color picker */}
                                                     <div>
                                                         <h4 className="text-sm font-medium text-gray-900">Color</h4>
 
@@ -181,7 +171,6 @@ export default function PopUp({ open, setOpen }: Props) {
                                                         </RadioGroup>
                                                     </div>
 
-                                                    {/* Size picker */}
                                                     <div className="mt-8">
                                                         <div className="flex items-center justify-between">
                                                             <h4 className="text-sm font-medium text-gray-900">Size</h4>
@@ -228,14 +217,7 @@ export default function PopUp({ open, setOpen }: Props) {
 
                                                     <p onClick={() => router.push(product!.href)}
                                                         className="absolute top-4 left-4 text-center sm:static sm:mt-8 font-medium text-indigo-600 hover:text-indigo-500 cursor-pointer">
-                                                        {/* <Link href={product!.href}> */}
                                                         View full details
-
-                                                        {/* <a className="font-medium text-indigo-600 hover:text-indigo-500">
-                                                            View full details
-                                                        </a> */}
-                                                        {/* </Link> */}
-
                                                     </p>
                                                 </form>
                                             </section>

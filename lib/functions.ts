@@ -3,7 +3,7 @@ import { appendQty } from 'components/Redux/Slices/cartSlice'
 // import { getCurrentItem } from 'components/Redux/Slices/currentItemSlice'
 import { Dispatch } from 'redux'
 import { DetailedProduct, reqBody } from 'types'
-import { getItems } from '../Redux/Slices/itemSlice'
+import { getItems } from '../components/Redux/Slices/itemSlice'
 
 export const getProducts = async (dispatch: Dispatch) => {
     try {

@@ -1,204 +1,17 @@
 import { Fragment, useEffect, useState } from 'react'
-import { Dialog, Disclosure, Menu, Popover, Tab, Transition } from '@headlessui/react'
-import { Bars3Icon, MagnifyingGlassIcon, ShoppingBagIcon, UserIcon, XMarkIcon } from '@heroicons/react/24/outline'
+import { Disclosure, Menu, Transition } from '@headlessui/react'
 import { ChevronDownIcon, FunnelIcon, StarIcon } from '@heroicons/react/20/solid'
 import { NextPage } from 'next'
 import Link from 'next/link'
 import Layout from 'components/layout'
-import { classNames } from 'components/Data/functions'
-import { footerNavigation } from 'components/Data/data'
-import axios from 'axios'
-import { DetailedProduct } from 'types'
+import { classNames } from 'lib/functions'
+import { Color, DetailedProduct, Highlights, Quantity, Size, Image } from 'types'
 import { categoryFilter, clearFilter, colorFilter, priceFilter, sizeFilter } from 'components/Redux/Slices/filterSlice'
 import { useDispatch } from 'react-redux'
 import { useAppSelector } from 'components/Redux/hooks'
 import { addCurrentProducts, changeCurrent } from 'components/Redux/Slices/sortSlice'
+import { extractSheets } from "spreadsheet-to-json"
 
-const navigation = {
-    categories: [
-        {
-            id: 'women',
-            name: 'Women',
-            featured: [
-                {
-                    name: 'New Arrivals',
-                    href: '#',
-                    imageSrc: 'https://tailwindui.com/img/ecommerce-images/mega-menu-category-01.jpg',
-                    imageAlt: 'Models sitting back to back, wearing Basic Tee in black and bone.',
-                },
-                {
-                    name: 'Basic Tees',
-                    href: '#',
-                    imageSrc: 'https://tailwindui.com/img/ecommerce-images/mega-menu-category-02.jpg',
-                    imageAlt: 'Close up of Basic Tee fall bundle with off-white, ochre, olive, and black tees.',
-                },
-                {
-                    name: 'Accessories',
-                    href: '#',
-                    imageSrc: 'https://tailwindui.com/img/ecommerce-images/mega-menu-category-03.jpg',
-                    imageAlt: 'Model wearing minimalist watch with black wristband and white watch face.',
-                },
-            ],
-            sections: [
-                [
-                    {
-                        id: 'shoes',
-                        name: 'Shoes & Accessories',
-                        items: [
-                            { name: 'Sneakers', href: '#' },
-                            { name: 'Boots', href: '#' },
-                            { name: 'Flats', href: '#' },
-                            { name: 'Sandals', href: '#' },
-                            { name: 'Heels', href: '#' },
-                            { name: 'Socks', href: '#' },
-                        ],
-                    },
-                    {
-                        id: 'collection',
-                        name: 'Shop Collection',
-                        items: [
-                            { name: 'Everything', href: '#' },
-                            { name: 'Core', href: '#' },
-                            { name: 'New Arrivals', href: '#' },
-                            { name: 'Sale', href: '#' },
-                            { name: 'Accessories', href: '#' },
-                        ],
-                    },
-                ],
-                [
-                    {
-                        id: 'clothing',
-                        name: 'All Clothing',
-                        items: [
-                            { name: 'Basic Tees', href: '#' },
-                            { name: 'Artwork Tees', href: '#' },
-                            { name: 'Tops', href: '#' },
-                            { name: 'Bottoms', href: '#' },
-                            { name: 'Swimwear', href: '#' },
-                            { name: 'Underwear', href: '#' },
-                        ],
-                    },
-                    {
-                        id: 'accessories',
-                        name: 'All Accessories',
-                        items: [
-                            { name: 'Watches', href: '#' },
-                            { name: 'Wallets', href: '#' },
-                            { name: 'Bags', href: '#' },
-                            { name: 'Sunglasses', href: '#' },
-                            { name: 'Hats', href: '#' },
-                            { name: 'Belts', href: '#' },
-                        ],
-                    },
-                ],
-                [
-                    {
-                        id: 'brands',
-                        name: 'Brands',
-                        items: [
-                            { name: 'Full Nelson', href: '#' },
-                            { name: 'My Way', href: '#' },
-                            { name: 'Re-Arranged', href: '#' },
-                            { name: 'Counterfeit', href: '#' },
-                            { name: 'Significant Other', href: '#' },
-                        ],
-                    },
-                ],
-            ],
-        },
-        {
-            id: 'men',
-            name: 'Men',
-            featured: [
-                {
-                    name: 'Accessories',
-                    href: '#',
-                    imageSrc: 'https://tailwindui.com/img/ecommerce-images/home-page-03-category-01.jpg',
-                    imageAlt:
-                        'Wooden shelf with gray and olive drab green baseball caps, next to wooden clothes hanger with sweaters.',
-                },
-                {
-                    name: 'New Arrivals',
-                    href: '#',
-                    imageSrc: 'https://tailwindui.com/img/ecommerce-images/product-page-04-detail-product-shot-01.jpg',
-                    imageAlt: 'Drawstring top with elastic loop closure and textured interior padding.',
-                },
-                {
-                    name: 'Artwork Tees',
-                    href: '#',
-                    imageSrc: 'https://tailwindui.com/img/ecommerce-images/category-page-02-image-card-06.jpg',
-                    imageAlt:
-                        'Three shirts in gray, white, and blue arranged on table with same line drawing of hands and shapes overlapping on front of shirt.',
-                },
-            ],
-            sections: [
-                [
-                    {
-                        id: 'shoes',
-                        name: 'Shoes & Accessories',
-                        items: [
-                            { name: 'Sneakers', href: '#' },
-                            { name: 'Boots', href: '#' },
-                            { name: 'Sandals', href: '#' },
-                            { name: 'Socks', href: '#' },
-                        ],
-                    },
-                    {
-                        id: 'collection',
-                        name: 'Shop Collection',
-                        items: [
-                            { name: 'Everything', href: '#' },
-                            { name: 'Core', href: '#' },
-                            { name: 'New Arrivals', href: '#' },
-                            { name: 'Sale', href: '#' },
-                        ],
-                    },
-                ],
-                [
-                    {
-                        id: 'clothing',
-                        name: 'All Clothing',
-                        items: [
-                            { name: 'Basic Tees', href: '#' },
-                            { name: 'Artwork Tees', href: '#' },
-                            { name: 'Pants', href: '#' },
-                            { name: 'Hoodies', href: '#' },
-                            { name: 'Swimsuits', href: '#' },
-                        ],
-                    },
-                    {
-                        id: 'accessories',
-                        name: 'All Accessories',
-                        items: [
-                            { name: 'Watches', href: '#' },
-                            { name: 'Wallets', href: '#' },
-                            { name: 'Bags', href: '#' },
-                            { name: 'Sunglasses', href: '#' },
-                            { name: 'Hats', href: '#' },
-                            { name: 'Belts', href: '#' },
-                        ],
-                    },
-                ],
-                [
-                    {
-                        id: 'brands',
-                        name: 'Brands',
-                        items: [
-                            { name: 'Re-Arranged', href: '#' },
-                            { name: 'Counterfeit', href: '#' },
-                            { name: 'Full Nelson', href: '#' },
-                            { name: 'My Way', href: '#' },
-                        ],
-                    },
-                ],
-            ],
-        },
-    ],
-    pages: [
-        { name: 'Company', href: '#' },
-        { name: 'Stores', href: '#' },
-    ],
-}
 
 const Collection: NextPage = ({ products }: { products?: DetailedProduct[] }) => {
     const dispatch = useDispatch()
@@ -206,16 +19,15 @@ const Collection: NextPage = ({ products }: { products?: DetailedProduct[] }) =>
     const sortOptions = useAppSelector(state => state.sort.sortOptions)
     const currentSort = useAppSelector(state => state.sort.currentProducts)
 
+    const sumAll = filters.color.filter(color => color.checked === true).length +
+        filters.size.filter(size => size.checked === true).length +
+        filters.category.filter(category => category.checked === true).length +
+        filters.price.filter(price => price.checked === true).length;
+
     const [sumFilters, setSumFilters] = useState<number>(0)
-    // const [showProducts, setShowProducts] = useState<DetailedProduct[]>(products!)
 
     useEffect(() => {
-        setSumFilters(filters.color.filter(color => color.checked === true).length +
-            filters.size.filter(size => size.checked === true).length +
-            filters.category.filter(category => category.checked === true).length +
-            filters.price.filter(price => price.checked === true).length
-        );
-        // setShowProducts(filter(products!))
+        setSumFilters(sumAll);
         dispatch(addCurrentProducts(filter(products!)))
     }, [filters])
 
@@ -473,44 +285,46 @@ const Collection: NextPage = ({ products }: { products?: DetailedProduct[] }) =>
                         </h2>
 
                         <div className="-mx-px grid grid-cols-2 border-l border-gray-200 sm:mx-0 md:grid-cols-3 lg:grid-cols-4">
-                            {currentSort.map((product) => (
-                                <div key={product.id} className="group relative border-r border-b border-gray-200 p-4 sm:p-6">
-                                    <div className="aspect-w-1 aspect-h-1 overflow-hidden rounded-lg bg-gray-200 group-hover:opacity-75">
-                                        <img
-                                            src={product.imageSrc}
-                                            alt={product.imageAlt}
-                                            className="h-full w-full object-cover object-center"
-                                        />
-                                    </div>
-                                    <div className="pt-10 pb-4 text-center">
-                                        <h3 className="text-sm font-medium text-gray-900">
-                                            <Link href={product.href}>
-                                                <a>
-                                                    <span aria-hidden="true" className="absolute inset-0" />
-                                                    {product.name}
-                                                </a>
-                                            </Link>
-                                        </h3>
-                                        <div className="mt-3 flex flex-col items-center">
-                                            <p className="sr-only">{product.rating} out of 5 stars</p>
-                                            <div className="flex items-center">
-                                                {[0, 1, 2, 3, 4].map((rating) => (
-                                                    <StarIcon
-                                                        key={rating}
-                                                        className={classNames(
-                                                            Number(product.rating) > rating ? 'text-yellow-400' : 'text-gray-200',
-                                                            'flex-shrink-0 h-5 w-5'
-                                                        )}
-                                                        aria-hidden="true"
-                                                    />
-                                                ))}
-                                            </div>
-                                            {/* <p className="mt-1 text-sm text-gray-500">{product.reviewCount} reviews</p> */}
+                            {currentSort.length === 0 ?
+                                <div>No products matching your criteria...</div> :
+                                currentSort.map((product) => (
+                                    <div key={product.id} className="group relative border-r border-b border-gray-200 p-4 sm:p-6">
+                                        <div className="aspect-w-1 aspect-h-1 overflow-hidden rounded-lg bg-gray-200 group-hover:opacity-75">
+                                            <img
+                                                src={product.imageSrc}
+                                                alt={product.imageAlt}
+                                                className="h-full w-full object-cover object-center"
+                                            />
                                         </div>
-                                        <p className="mt-4 text-base font-medium text-gray-900">${product.price}.00</p>
+                                        <div className="pt-10 pb-4 text-center">
+                                            <h3 className="text-sm font-medium text-gray-900">
+                                                <Link href={product.href}>
+                                                    <a>
+                                                        <span aria-hidden="true" className="absolute inset-0" />
+                                                        {product.name}
+                                                    </a>
+                                                </Link>
+                                            </h3>
+                                            <div className="mt-3 flex flex-col items-center">
+                                                <p className="sr-only">{product.rating} out of 5 stars</p>
+                                                <div className="flex items-center">
+                                                    {[0, 1, 2, 3, 4].map((rating) => (
+                                                        <StarIcon
+                                                            key={rating}
+                                                            className={classNames(
+                                                                Number(product.rating) > rating ? 'text-yellow-400' : 'text-gray-200',
+                                                                'flex-shrink-0 h-5 w-5'
+                                                            )}
+                                                            aria-hidden="true"
+                                                        />
+                                                    ))}
+                                                </div>
+                                                {/* <p className="mt-1 text-sm text-gray-500">{product.reviewCount} reviews</p> */}
+                                            </div>
+                                            <p className="mt-4 text-base font-medium text-gray-900">${product.price}.00</p>
+                                        </div>
                                     </div>
-                                </div>
-                            ))}
+                                ))}
                         </div>
                     </section>
 
@@ -585,11 +399,32 @@ export default Collection
 
 export async function getStaticProps() {
     try {
-        const res = await axios.get(`http://localhost:3000/api/items`)
-        const data = res.data
+        let trendingProducts;
+        const credentials = JSON.parse(
+            Buffer.from(process.env.secret!, 'base64').toString()
+        )
+        await extractSheets(
+            {
+                spreadsheetKey: process.env.sheet_key,
+                credentials,
+                sheetsToExtract: ["items", "highlights", "images", "colors", "sizes", "colorSizesQty"],
+            },
+            function (err: Error, data: any) {
+                let detailedProducts = data.items.map((item: DetailedProduct) => {
+                    const images = data.images.filter((image: Image) => image.id === item.id)
+                    const highlights = data.highlights.filter((highlight: Highlights) => highlight.id === item.id)
+                    const colors = data.colors.filter((color: Color) => color.id === item.id)
+                    const sizes = data.sizes.filter((size: Size) => size.id === item.id)
+                    let quantities = data.colorSizesQty.filter((variant: Quantity) => variant.id === item.id)
+                    return item = { ...item, images, highlights, colors, sizes, quantities }
+                }
+                )
+                trendingProducts = detailedProducts
+            }
+        );
         return {
             props: {
-                products: data
+                products: trendingProducts,
             }
         }
     } catch (error) {

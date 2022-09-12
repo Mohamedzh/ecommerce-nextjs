@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { Filter } from "types";
-import { filters } from "components/Data/data";
+import { filters } from "lib/data";
 
 const initialState: {
     price: Filter[], color: Filter[], size: Filter[], category: Filter[]

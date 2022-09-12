@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { sortOptions } from "components/Data/data";
+import { sortOptions } from "lib/data";
 import { DetailedProduct, SortOption } from "types";
 
 const initialState: { sortOptions: SortOption[], current: string, currentProducts: DetailedProduct[] } = { sortOptions, current: '', currentProducts: [] };

@@ -2,7 +2,7 @@ import { Dialog, Tab, Transition } from '@headlessui/react'
 import { XMarkIcon } from '@heroicons/react/24/outline'
 import { classNames } from 'lib'
 import { Fragment } from 'react'
-import {navigation} from './Data/data'
+import {navigation} from '../lib/data'
 
 type props = {
   open: boolean
@@ -46,7 +46,6 @@ function Drawer({ open, setOpen }: props) {
                 </button>
               </div>
 
-              {/* Links */}
               <Tab.Group as="div" className="mt-2">
                 <div className="border-b border-gray-200">
                   <Tab.List className="-mb-px flex space-x-8 px-4">

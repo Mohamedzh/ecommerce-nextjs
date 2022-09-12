@@ -15,8 +15,15 @@ export const cartSlice = createSlice({
     initialState,
     reducers: {
         addToCart: (state, action: PayloadAction<AddedItem>) => {
-            let newCartItem = { ...action.payload.product, quantity: 1, color: action.payload.color, size: action.payload.size }
-            let item = state.find(x => x.id === action.payload.product.id && x.size === action.payload.size && x.color === action.payload.color)
+            let newCartItem = {
+                ...action.payload.product,
+                quantity: 1,
+                color: action.payload.color,
+                size: action.payload.size
+            }
+            let item = state.find(x => x.id === action.payload.product.id
+                && x.size === action.payload.size
+                && x.color === action.payload.color)
             console.log(item)
             console.log(newCartItem)
             if (item) {

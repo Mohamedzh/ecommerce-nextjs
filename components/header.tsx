@@ -4,7 +4,7 @@ import { classNames } from 'lib'
 import { Fragment, useEffect, useState } from 'react'
 import Drawer from './drawer'
 import ShoppingCartDrawer from './shoppingCartDrawer'
-import { navigation } from './Data/data'
+import { navigation } from '../lib/data'
 import Link from 'next/link'
 import { useAppSelector } from './Redux/hooks'
 
@@ -43,7 +43,6 @@ function Header() {
                 </div>
 
                 <div className="hidden h-full lg:flex">
-                  {/* Flyout menus */}
                   <Popover.Group className="inset-x-0 bottom-0 px-4">
                     <div className="flex h-full justify-center space-x-8">
                       {navigation.categories.map((category) => (
@@ -80,12 +79,10 @@ function Header() {
                                 leaveTo="opacity-0"
                               >
                                 <Popover.Panel className="absolute inset-x-0 top-full z-10 bg-white text-sm text-gray-500">
-                                  {/* Presentational element used to render the bottom shadow, if we put the shadow on the actual panel it pokes out the top, so we use this shorter element to hide the top of the shadow */}
                                   <div
                                     className="absolute inset-0 top-1/2 bg-white shadow"
                                     aria-hidden="true"
                                   />
-                                  {/* Fake border when menu is open */}
                                   <div
                                     className="absolute inset-0 top-0 mx-auto h-px max-w-7xl px-8"
                                     aria-hidden="true"

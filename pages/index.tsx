@@ -2,11 +2,15 @@ import type { NextPage } from 'next'
 import Layout from 'components/layout'
 import { useEffect, useState } from 'react'
 import { useAppSelector } from 'components/Redux/hooks'
-import { getProducts } from 'components/Data/functions'
+import { getProducts } from 'lib/functions'
 import { useDispatch } from 'react-redux'
 import Link from 'next/link'
 import PopUp from 'components/productPopUp'
 import { setCurrentItemId } from 'components/Redux/Slices/currentItemSlice'
+import { extractSheets } from "spreadsheet-to-json"
+import { Color, DetailedProduct, Highlights, Image, Quantity, Size } from 'types'
+import { getItems } from 'components/Redux/Slices/itemSlice'
+
 
 
 const collections = [
@@ -65,15 +69,22 @@ const perks = [
   },
 ]
 
+type Props = {
+  products?: DetailedProduct[],
+}
 
-const Home: NextPage = () => {
+const Home: NextPage = ({ products }: Props) => {
   const dispatch = useDispatch()
   useEffect(() => {
-    getProducts(dispatch);
-    // getProductDetails('2', dispatch)
+    if (products) {
+      dispatch(getItems(products))
+      console.log(products)
+    }
   }, [])
-
   const trendingProducts = useAppSelector(state => state.item)
+
+  useEffect(() => { console.log(trendingProducts) }, [trendingProducts])
+
   const thisProduct = useAppSelector(state => state.currentItem)
 
   const [open, setOpen] = useState(false)
@@ -126,12 +137,12 @@ const Home: NextPage = () => {
                   Mid-Season Sale
                 </h1>
                 <div className="mt-4 sm:mt-6">
-                <Link href="/product">
-                  <a
-                    className="inline-block rounded-md border border-transparent bg-indigo-600 py-3 px-8 font-medium text-white hover:bg-indigo-700"
-                  >
-                    Shop Collection
-                  </a>
+                  <Link href="/product">
+                    <a
+                      className="inline-block rounded-md border border-transparent bg-indigo-600 py-3 px-8 font-medium text-white hover:bg-indigo-700"
+                    >
+                      Shop Collection
+                    </a>
                   </Link>
                 </div>
               </div>
@@ -194,16 +205,16 @@ const Home: NextPage = () => {
                   Trending Products
                 </h2>
                 <Link href="/product">
-                <a
-                  className="hidden text-sm font-medium text-indigo-600 hover:text-indigo-500 md:block"
-                >
-                  Shop the collection<span aria-hidden="true"> &rarr;</span>
-                </a>
+                  <a
+                    className="hidden text-sm font-medium text-indigo-600 hover:text-indigo-500 md:block"
+                  >
+                    Shop the collection<span aria-hidden="true"> &rarr;</span>
+                  </a>
                 </Link>
               </div>
 
               <div className="mt-6 grid grid-cols-2 gap-x-4 gap-y-10 sm:gap-x-6 md:grid-cols-4 md:gap-y-0 lg:gap-x-8">
-                {trendingProducts.map((product) => (
+                {trendingProducts?.map((product) => (
                   <div key={product.id} className="group relative">
                     <div className="h-56 w-full overflow-hidden rounded-md group-hover:opacity-75 lg:h-72 xl:h-80 aspect-w-4 aspect-h-3 bg-gray-100">
 
@@ -225,7 +236,7 @@ const Home: NextPage = () => {
                       className="mt-4 text-sm text-gray-700 cursor-pointer">
                       {/* <Link href={product.href}> */}
                       {/* <a> */}
-                      <PopUp open={open} setOpen={setOpen}/>
+                      <PopUp open={open} setOpen={setOpen} />
 
                       <span className="absolute inset-0" />
                       {product.name}
@@ -243,12 +254,12 @@ const Home: NextPage = () => {
               </div>
 
               <div className="mt-8 text-sm md:hidden">
-              <Link href="/product">
-                <a
-                  className="font-medium text-indigo-600 hover:text-indigo-500"
-                >
-                  Shop the collection<span aria-hidden="true"> &rarr;</span>
-                </a>
+                <Link href="/product">
+                  <a
+                    className="font-medium text-indigo-600 hover:text-indigo-500"
+                  >
+                    Shop the collection<span aria-hidden="true"> &rarr;</span>
+                  </a>
                 </Link>
               </div>
             </div>
@@ -298,3 +309,38 @@ const Home: NextPage = () => {
 }
 
 export default Home
+
+export async function getStaticProps() {
+  try {
+    let trendingProducts;
+    const credentials = JSON.parse(
+      Buffer.from(process.env.secret!, 'base64').toString()
+    )
+    await extractSheets(
+      {
+        spreadsheetKey: process.env.sheet_key,
+        credentials,
+        sheetsToExtract: ["items", "highlights", "images", "colors", "sizes", "colorSizesQty"],
+      },
+      function (err: Error, data: any) {
+        let detailedProducts = data.items.map((item: DetailedProduct) => {
+          const images = data.images.filter((image: Image) => image.id === item.id)
+          const highlights = data.highlights.filter((highlight: Highlights) => highlight.id === item.id)
+          const colors = data.colors.filter((color: Color) => color.id === item.id)
+          const sizes = data.sizes.filter((size: Size) => size.id === item.id)
+          let quantities = data.colorSizesQty.filter((variant: Quantity) => variant.id === item.id)
+          return item = { ...item, images, highlights, colors, sizes, quantities }
+        }
+        )
+        trendingProducts = detailedProducts
+      }
+    );
+    return {
+      props: {
+        products: trendingProducts,
+      }
+    }
+  } catch (error) {
+    console.log(error)
+  }
+}

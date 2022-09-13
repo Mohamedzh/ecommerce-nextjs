@@ -33,6 +33,22 @@ export default function PopUp({ open, setOpen }: Props) {
     //     && theme.size === selectedSize.name)
 
     useEffect(() => {
+        if (product?.colors.length === 0) {
+            setSelectedColor({
+                id: '',
+                name: '',
+                class: '',
+                selectedClass: ''
+            })
+        }
+        if (product?.sizes.length === 0) {
+            setSelectedSize({
+                id: '',
+                name: '',
+                inStock: ''
+            })
+        }
+
         let current = product!.quantities.find(theme => theme.color === selectedColor.name
             && theme.size === selectedSize.name)
         setCurrentTheme(current!)
@@ -40,10 +56,12 @@ export default function PopUp({ open, setOpen }: Props) {
             setSelectedQuantity(currentTheme.qty)
             dispatch(updateQty(currentTheme.qty))
         }
+        else {
+            setSelectedQuantity(product!.availableQty)
+            dispatch(updateQty(product!.availableQty))
+        }
     }, [selectedSize, selectedColor])
-    // if (!product) {
-    //     alert('loading...')
-    // }
+
     return (
         <Transition.Root show={open} as={Fragment}>
             <Dialog as="div" className="relative z-10" onClose={setOpen}>
@@ -135,78 +153,81 @@ export default function PopUp({ open, setOpen }: Props) {
                                                 </h3>
 
                                                 <form>
-                                                    <div>
-                                                        <h4 className="text-sm font-medium text-gray-900">Color</h4>
+                                                    {product?.colors.length !== 0 &&
+                                                        <div>
+                                                            <h4 className="text-sm font-medium text-gray-900">Color</h4>
 
-                                                        <RadioGroup value={selectedColor} onChange={setSelectedColor} className="mt-2">
-                                                            <RadioGroup.Label className="sr-only"> Choose a color </RadioGroup.Label>
-                                                            <div className="flex items-center space-x-3">
-                                                                {product?.colors.map((color) => (
-                                                                    <RadioGroup.Option
-                                                                        key={color.name}
-                                                                        value={color}
-                                                                        className={({ active, checked }) =>
-                                                                            classNames(
-                                                                                color.selectedClass,
-                                                                                active && checked ? 'ring ring-offset-1' : '',
-                                                                                !active && checked ? 'ring-2' : '',
-                                                                                '-m-0.5 relative p-0.5 rounded-full flex items-center justify-center cursor-pointer focus:outline-none'
-                                                                            )
-                                                                        }
-                                                                    >
-                                                                        <RadioGroup.Label as="span" className="sr-only">
-                                                                            {' '}
-                                                                            {color.name}{' '}
-                                                                        </RadioGroup.Label>
-                                                                        <span
-                                                                            aria-hidden="true"
-                                                                            className={classNames(
-                                                                                color.class,
-                                                                                'h-8 w-8 border border-black border-opacity-10 rounded-full'
-                                                                            )}
-                                                                        />
-                                                                    </RadioGroup.Option>
-                                                                ))}
-                                                            </div>
-                                                        </RadioGroup>
-                                                    </div>
-
-                                                    <div className="mt-8">
-                                                        <div className="flex items-center justify-between">
-                                                            <h4 className="text-sm font-medium text-gray-900">Size</h4>
-                                                            <a href="#" className="text-sm font-medium text-indigo-600 hover:text-indigo-500">
-                                                                Size guide
-                                                            </a>
+                                                            <RadioGroup value={selectedColor} onChange={setSelectedColor} className="mt-2">
+                                                                <RadioGroup.Label className="sr-only"> Choose a color </RadioGroup.Label>
+                                                                <div className="flex items-center space-x-3">
+                                                                    {product?.colors.map((color) => (
+                                                                        <RadioGroup.Option
+                                                                            key={color.name}
+                                                                            value={color}
+                                                                            className={({ active, checked }) =>
+                                                                                classNames(
+                                                                                    color.selectedClass,
+                                                                                    active && checked ? 'ring ring-offset-1' : '',
+                                                                                    !active && checked ? 'ring-2' : '',
+                                                                                    '-m-0.5 relative p-0.5 rounded-full flex items-center justify-center cursor-pointer focus:outline-none'
+                                                                                )
+                                                                            }
+                                                                        >
+                                                                            <RadioGroup.Label as="span" className="sr-only">
+                                                                                {' '}
+                                                                                {color.name}{' '}
+                                                                            </RadioGroup.Label>
+                                                                            <span
+                                                                                aria-hidden="true"
+                                                                                className={classNames(
+                                                                                    color.class,
+                                                                                    'h-8 w-8 border border-black border-opacity-10 rounded-full'
+                                                                                )}
+                                                                            />
+                                                                        </RadioGroup.Option>
+                                                                    ))}
+                                                                </div>
+                                                            </RadioGroup>
                                                         </div>
+                                                    }
+                                                    {product?.sizes.length !== 0 &&
 
-                                                        <RadioGroup value={selectedSize} onChange={setSelectedSize} className="mt-2">
-                                                            <RadioGroup.Label className="sr-only"> Choose a size </RadioGroup.Label>
-                                                            <div className="grid grid-cols-7 gap-2">
-                                                                {product?.sizes.map((size) => (
-                                                                    <RadioGroup.Option
-                                                                        key={size.name}
-                                                                        value={size}
-                                                                        className={({ active, checked }) =>
-                                                                            classNames(
-                                                                                size.inStock
-                                                                                    ? 'cursor-pointer focus:outline-none'
-                                                                                    : 'opacity-25 cursor-not-allowed',
-                                                                                active ? 'ring-2 ring-offset-2 ring-indigo-500' : '',
-                                                                                checked
-                                                                                    ? 'bg-indigo-600 border-transparent text-white hover:bg-indigo-700'
-                                                                                    : 'bg-white border-gray-200 text-gray-900 hover:bg-gray-50',
-                                                                                'border rounded-md py-3 px-3 flex items-center justify-center text-sm font-medium uppercase sm:flex-1'
-                                                                            )
-                                                                        }
-                                                                        disabled={!size.inStock}
-                                                                    >
-                                                                        <RadioGroup.Label as="span">{size.name}</RadioGroup.Label>
-                                                                    </RadioGroup.Option>
-                                                                ))}
+                                                        <div className="mt-8">
+                                                            <div className="flex items-center justify-between">
+                                                                <h4 className="text-sm font-medium text-gray-900">Size</h4>
+                                                                <a href="#" className="text-sm font-medium text-indigo-600 hover:text-indigo-500">
+                                                                    Size guide
+                                                                </a>
                                                             </div>
-                                                        </RadioGroup>
-                                                    </div>
 
+                                                            <RadioGroup value={selectedSize} onChange={setSelectedSize} className="mt-2">
+                                                                <RadioGroup.Label className="sr-only"> Choose a size </RadioGroup.Label>
+                                                                <div className="grid grid-cols-7 gap-2">
+                                                                    {product?.sizes.map((size) => (
+                                                                        <RadioGroup.Option
+                                                                            key={size.name}
+                                                                            value={size}
+                                                                            className={({ active, checked }) =>
+                                                                                classNames(
+                                                                                    size.inStock
+                                                                                        ? 'cursor-pointer focus:outline-none'
+                                                                                        : 'opacity-25 cursor-not-allowed',
+                                                                                    active ? 'ring-2 ring-offset-2 ring-indigo-500' : '',
+                                                                                    checked
+                                                                                        ? 'bg-indigo-600 border-transparent text-white hover:bg-indigo-700'
+                                                                                        : 'bg-white border-gray-200 text-gray-900 hover:bg-gray-50',
+                                                                                    'border rounded-md py-3 px-3 flex items-center justify-center text-sm font-medium uppercase sm:flex-1'
+                                                                                )
+                                                                            }
+                                                                            disabled={!size.inStock}
+                                                                        >
+                                                                            <RadioGroup.Label as="span">{size.name}</RadioGroup.Label>
+                                                                        </RadioGroup.Option>
+                                                                    ))}
+                                                                </div>
+                                                            </RadioGroup>
+                                                        </div>
+                                                    }
                                                     <button
                                                         type="button"
                                                         className="mt-8 flex w-full items-center justify-center rounded-md border border-transparent bg-indigo-600 py-3 px-8 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"

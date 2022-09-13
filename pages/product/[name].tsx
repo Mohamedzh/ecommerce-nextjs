@@ -3,7 +3,6 @@ import Layout from 'components/layout'
 import { classNames } from 'lib'
 import { useEffect, useState } from 'react'
 import { reviews } from '../../lib/data'
-import axios from 'axios'
 import { Color, DetailedProduct, Highlights, Image, Product, Quantity, Size } from 'types'
 import { addToCart } from 'components/Redux/Slices/cartSlice'
 import { useDispatch } from 'react-redux'
@@ -23,17 +22,26 @@ export default function ProductPage({ product }: Props) {
 
   const [selectedQuantity, setSelectedQuantity] = useState<string>('0')
 
-  // if (product.colors.length === 0) {
-  //   setSelectedColor('')
-  // }
-
-  // if (product.sizes.length === 0) {
-  // }
-
   let currentTheme = product.quantities.find(theme => theme.color === selectedColor.name
     && theme.size === selectedSize.name)
 
   useEffect(() => {
+    if (product.colors.length === 0) {
+      setSelectedColor({
+        id: '',
+        name: '',
+        class: '',
+        selectedClass: ''
+      })
+    }
+
+    if (product.sizes.length === 0) {
+      setSelectedSize({
+        id: '',
+        name: '',
+        inStock: ''
+      })
+    }
     if (currentTheme) {
       setSelectedQuantity(currentTheme.qty)
       dispatch(updateQty(currentTheme.qty))
@@ -221,7 +229,7 @@ export default function ProductPage({ product }: Props) {
               <button
                 type="button"
                 className="mt-10 flex w-full items-center justify-center rounded-md border border-transparent bg-indigo-600 py-3 px-8 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-                onClick={() => { dispatch(addToCart({ product, color: (product.color.length === 0 ? '' : selectedColor.name), size: (product.size.length === 0 ? '' : selectedSize.name), availableQty: selectedQuantity })) }}
+                onClick={() => { dispatch(addToCart({ product, color: (product.color.length === 0 ? '' : selectedColor.name), size: (product.sizes.length === 0 ? '' : selectedSize.name), availableQty: selectedQuantity })) }}
               >
                 Add to bag
               </button>
@@ -330,12 +338,31 @@ export default function ProductPage({ product }: Props) {
 }
 
 export async function getStaticPaths() {
-  const res = await axios.get('http://localhost:3000/api/items')
-  const items = res.data
-  const paths = items.map((item: Product) => ({
-    params: { name: item.id },
-  }))
-  return { paths, fallback: false }
+  try {
+    let products: Product[];
+    const credentials = JSON.parse(
+        Buffer.from(process.env.secret!, 'base64').toString()
+    )
+    await extractSheets(
+        {
+            spreadsheetKey: process.env.sheet_key,
+            credentials,
+            sheetsToExtract: ["items", "highlights", "images", "colors", "sizes", "colorSizesQty"],
+        },
+        function (err: Error, data: any) {
+            products = data.items
+        }
+    );
+    return {
+        paths: products!.map((item: Product) => ({
+            params: { name: item.id },
+        }))
+        , fallback: false
+    }
+} catch (error) {
+    console.log(error)
+}
+
 }
 
 export async function getStaticProps({ params }: { params: { name: string } }) {

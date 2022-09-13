@@ -10,27 +10,28 @@ import { setCurrentItemId } from 'components/Redux/Slices/currentItemSlice'
 import { extractSheets } from "spreadsheet-to-json"
 import { Color, DetailedProduct, Highlights, Image, Quantity, Size } from 'types'
 import { getItems } from 'components/Redux/Slices/itemSlice'
+import { product } from 'lib/data'
 
 
 
 const collections = [
   {
     name: "Women's",
-    href: '#',
+    href: '/product/women',
     imageSrc:
       'https://tailwindui.com/img/ecommerce-images/home-page-04-collection-01.jpg',
     imageAlt: 'Woman wearing a comfortable cotton t-shirt.',
   },
   {
     name: "Men's",
-    href: '#',
+    href: '/product/men',
     imageSrc:
       'https://tailwindui.com/img/ecommerce-images/home-page-04-collection-02.jpg',
     imageAlt: 'Man wearing a comfortable and casual cotton t-shirt.',
   },
   {
     name: 'Desk Accessories',
-    href: '#',
+    href: '/product/desk',
     imageSrc:
       'https://tailwindui.com/img/ecommerce-images/home-page-04-collection-03.jpg',
     imageAlt:
@@ -81,22 +82,18 @@ const Home: NextPage = ({ products }: Props) => {
       console.log(products)
     }
   }, [])
-  const trendingProducts = useAppSelector(state => state.item)
-
-  useEffect(() => { console.log(trendingProducts) }, [trendingProducts])
-
-  const thisProduct = useAppSelector(state => state.currentItem)
-
+  const allProducts = useAppSelector(state => state.item)
   const [open, setOpen] = useState(false)
 
+  const trendingProducts = allProducts.filter(product => product.trending === 'true')
+
+  // useEffect(() => { console.log(trendingProducts) }, [trendingProducts])
 
   return (
     <div className="">
       <Layout>
         <main>
-          {/* Hero section */}
           <div className="relative">
-            {/* Background image and overlap */}
             <div
               aria-hidden="true"
               className="absolute inset-0 hidden sm:flex sm:flex-col"
@@ -181,10 +178,12 @@ const Home: NextPage = ({ products }: Props) => {
                             Shop the collection
                           </p>
                           <h3 className="mt-1 font-semibold text-white">
-                            <a href={collection.href}>
-                              <span className="absolute inset-0" />
-                              {collection.name}
-                            </a>
+                            <Link href={collection.href}>
+                              <a>
+                                <span className="absolute inset-0" />
+                                {collection.name}
+                              </a>
+                            </Link>
                           </h3>
                         </div>
                       </div>
@@ -332,6 +331,7 @@ export async function getStaticProps() {
           return item = { ...item, images, highlights, colors, sizes, quantities }
         }
         )
+        // detailedProducts = detailedProducts.map((product: DetailedProduct) => { return { ...product, trending: JSON.parse(product.trending) } })
         trendingProducts = detailedProducts
       }
     );

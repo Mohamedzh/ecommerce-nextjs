@@ -9,6 +9,16 @@ import { useDispatch } from 'react-redux'
 import { RadioGroup } from '@headlessui/react'
 import { updateQty } from 'components/Redux/Slices/qtySlice'
 import { extractSheets } from "spreadsheet-to-json"
+import fs from 'fs'
+
+type ProductData = {
+  products: DetailedProduct[]
+  highlights: Highlights[]
+  images: Image[]
+  colors: Color[]
+  sizes: Size[]
+  colorSizesQty: Quantity[]
+}
 
 type Props = {
   product: DetailedProduct,
@@ -341,34 +351,6 @@ export async function getStaticPaths() {
   try {
     let products: Product[];
     const credentials = JSON.parse(
-        Buffer.from(process.env.secret!, 'base64').toString()
-    )
-    await extractSheets(
-        {
-            spreadsheetKey: process.env.sheet_key,
-            credentials,
-            sheetsToExtract: ["items", "highlights", "images", "colors", "sizes", "colorSizesQty"],
-        },
-        function (err: Error, data: any) {
-            products = data.items
-        }
-    );
-    return {
-        paths: products!.map((item: Product) => ({
-            params: { name: item.id },
-        }))
-        , fallback: false
-    }
-} catch (error) {
-    console.log(error)
-}
-
-}
-
-export async function getStaticProps({ params }: { params: { name: string } }) {
-  try {
-    let currentProduct;
-    const credentials = JSON.parse(
       Buffer.from(process.env.secret!, 'base64').toString()
     )
     await extractSheets(
@@ -378,26 +360,90 @@ export async function getStaticProps({ params }: { params: { name: string } }) {
         sheetsToExtract: ["items", "highlights", "images", "colors", "sizes", "colorSizesQty"],
       },
       function (err: Error, data: any) {
-        let highlights = data.highlights.filter((item: Highlights) => item.id === params.name)
-        let images = data.images.filter((item: Image) => item.id === params.name)
-        let colors = data.colors.filter((item: Color) => item.id === params.name)
-        let newSizes = data.sizes.filter((item: Size) => item.id === params.name)
-        let sizes = newSizes.map((size: Size) => {
-          return { ...size, inStock: JSON.parse(size.inStock) }
-        })
+        products = data.items
+        let newData = {
+          products: data.items,
+          highlights: data.highlights,
+          images: data.images,
+          colors: data.colors,
+          sizes: data.sizes,
+          colorSizesQty: data.colorSizesQty
+        }
 
-        let quantities = data.colorSizesQty.filter((item: Quantity) => item.id === params.name)
-        currentProduct = data.items.find((item: DetailedProduct) => item.id === params.name)
-        currentProduct = { ...currentProduct, highlights, images, colors, sizes, quantities }
+        fs.writeFile('data.txt', JSON.stringify(newData), (err) => {
+          if (err) throw err;
+        })
       }
     );
     return {
-      props: {
-        product: currentProduct,
-      }
+      paths: products!.map((item: Product) => ({
+        params: { name: item.id },
+      }))
+      , fallback: false
     }
   } catch (error) {
     console.log(error)
   }
+
+}
+
+export async function getStaticProps({ params }: { params: { name: string } }) {
+  let currentProduct;
+  // try {
+
+
+  let productData: ProductData
+  const fileData = await fs.promises.readFile('data.txt', "utf8")
+  console.log(fileData);
+
+  productData = JSON.parse(fileData)
+
+  let highlights = productData?.highlights.filter((item: Highlights) => item.id === params.name)
+  let images = productData?.images.filter((item: Image) => item.id === params.name)
+  let colors = productData?.colors.filter((item: Color) => item.id === params.name)
+  let newSizes = productData?.sizes.filter((item: Size) => item.id === params.name)
+  let sizes = newSizes.map((size: Size) => {
+    return { ...size, inStock: JSON.parse(size.inStock) }
+  })
+
+  let quantities = productData.colorSizesQty.filter((item: Quantity) => item.id === params.name)
+  currentProduct = productData.products.find((item: DetailedProduct) => item.id === params.name)
+
+  currentProduct = { ...currentProduct, highlights, images, colors, sizes, quantities }
+
+  // const credentials = JSON.parse(
+  //   Buffer.from(process.env.secret!, 'base64').toString()
+  // )
+  // await extractSheets(
+  //   {
+  //     spreadsheetKey: process.env.sheet_key,
+  //     credentials,
+  //     sheetsToExtract: ["items", "highlights", "images", "colors", "sizes", "colorSizesQty"],
+  //   },
+  //   function (err: Error, data: any) {
+  //     let highlights = data.highlights.filter((item: Highlights) => item.id === params.name)
+  //     let images = data.images.filter((item: Image) => item.id === params.name)
+  //     let colors = data.colors.filter((item: Color) => item.id === params.name)
+  //     let newSizes = data.sizes.filter((item: Size) => item.id === params.name)
+  //     let sizes = newSizes.map((size: Size) => {
+  //       return { ...size, inStock: JSON.parse(size.inStock) }
+  //     })
+
+  //     let quantities = data.colorSizesQty.filter((item: Quantity) => item.id === params.name)
+  //     currentProduct = data.items.find((item: DetailedProduct) => item.id === params.name)
+  //     currentProduct = { ...currentProduct, highlights, images, colors, sizes, quantities }
+  //   }
+  // );
+
+  // } catch (error) {
+  //   console.log(error)
+  // }
+  return {
+    props: {
+      product: currentProduct,
+    }
+  }
+
+
 }
 
